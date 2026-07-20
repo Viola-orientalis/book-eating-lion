@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { getCart, updateCartItem, removeCartItem } from '../api/cart'
-import { getProducts } from '../api/products'
+import { getBooks } from '../api/books'
 import { notifyCartChanged } from '../api/cartEvents'
 
 export default function Cart() {
@@ -14,28 +14,30 @@ export default function Cart() {
   const [busyItemId, setBusyItemId] = useState(null)
   const [removedNotice, setRemovedNotice] = useState('')
 
-  const loadCart = () => {
-    getCart()
-      .then((res) => {
-        setItems(res.data.items)
-        if (res.data.removedItems?.length > 0) {
-          const titles = res.data.removedItems.map((i) => i.title).join(', ')
+  useEffect(() => {
+    Promise.all([getCart(), getBooks({ size: 1000 })])
+      .then(([cartRes, booksRes]) => {
+        const map = {}
+        booksRes.data.content.forEach((b) => {
+          map[b.bookId] = b.stock
+        })
+        setStockMap(map)
+
+        // 서버가 판매 종료 도서를 걸러주지 않으므로, 프론트에서 최신 도서 목록과 대조해
+        // 더 이상 존재하지 않는 도서는 자동으로 제거하고 안내한다.
+        const availableIds = new Set(booksRes.data.content.map((b) => b.bookId))
+        const staleItems = cartRes.data.filter((item) => !availableIds.has(item.bookId))
+        const freshItems = cartRes.data.filter((item) => availableIds.has(item.bookId))
+        setItems(freshItems)
+
+        if (staleItems.length > 0) {
+          staleItems.forEach((item) => removeCartItem(item.id))
+          const titles = staleItems.map((item) => item.title).join(', ')
           setRemovedNotice(`판매 종료된 도서가 장바구니에서 제거되었습니다: ${titles}`)
         }
       })
       .catch(() => setItems([]))
       .finally(() => setLoading(false))
-  }
-
-  useEffect(() => {
-    loadCart()
-    getProducts().then((res) => {
-      const map = {}
-      res.data.forEach((p) => {
-        map[p.id] = p.stock
-      })
-      setStockMap(map)
-    })
   }, [])
 
   const totalPrice = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
@@ -69,19 +71,19 @@ export default function Cart() {
     setOrderError('')
     setChecking(true)
     try {
-      const res = await getProducts()
+      const res = await getBooks({ size: 1000 })
       const latestStock = {}
-      res.data.forEach((p) => {
-        latestStock[p.id] = p.stock
+      res.data.content.forEach((b) => {
+        latestStock[b.bookId] = b.stock
       })
       setStockMap(latestStock)
 
       const insufficientItem = items.find(
-        (item) => item.quantity > (latestStock[item.productId] ?? 0)
+        (item) => item.quantity > (latestStock[item.bookId] ?? 0)
       )
       if (insufficientItem) {
         setOrderError(
-          `${insufficientItem.title}의 재고가 부족합니다. (재고 ${latestStock[insufficientItem.productId] ?? 0}권)`
+          `${insufficientItem.title}의 재고가 부족합니다. (재고 ${latestStock[insufficientItem.bookId] ?? 0}권)`
         )
         return
       }
@@ -127,7 +129,7 @@ export default function Cart() {
 
           <div className="flex flex-col gap-3">
             {items.map((item) => {
-              const stock = stockMap[item.productId]
+              const stock = stockMap[item.bookId]
               const overStock = stock !== undefined && item.quantity > stock
               const busy = busyItemId === item.id
               return (

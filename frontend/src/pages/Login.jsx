@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext'
 export default function Login() {
   const navigate = useNavigate()
   const { setUser } = useAuth()
-  const [form, setForm] = useState({ username: '', password: '' })
+  const [form, setForm] = useState({ loginId: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -19,9 +19,10 @@ export default function Login() {
     setLoading(true)
     try {
       const res = await login(form)
-      // JWT 방식: 응답은 { accessToken, user } 형태
-      localStorage.setItem('accessToken', res.data.accessToken)
-      setUser(res.data.user)
+      // 로그인 응답은 평탄한 형태: { accessToken, memberId, name, role }
+      const { accessToken, ...member } = res.data
+      localStorage.setItem('accessToken', accessToken)
+      setUser(member)
       navigate('/')
     } catch (err) {
       setError(err.response?.data?.message || '아이디 또는 비밀번호를 확인해주세요.')
@@ -43,8 +44,8 @@ export default function Login() {
         <label className="flex flex-col gap-1 text-sm">
           <span>아이디</span>
           <input
-            name="username"
-            value={form.username}
+            name="loginId"
+            value={form.loginId}
             onChange={handleChange}
             required
             className="border rounded px-3 py-2 outline-none"

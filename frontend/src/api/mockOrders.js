@@ -1,44 +1,50 @@
 import { readMockList, writeMockList, nextMockId, mockApiError } from './mockStorage'
 import { getMockSessionUserId } from './mockSession'
-import { MOCK_PRODUCTS } from './mockProducts'
+import { MOCK_BOOKS } from './mockBooks'
 import { getMockStock } from './mockStock'
 
 export const ORDERS_KEY = 'bookmeogeun-mock-orders'
 
-export const mockCreateOrder = ({ items }) => {
+const toCreateResponse = (order) => ({
+  orderId: order.id,
+  totalAmount: order.totalAmount,
+  orderStatus: order.orderStatus,
+})
+
+export const mockCreateOrder = ({ orderItems }) => {
   const userId = getMockSessionUserId()
-  if (!userId) throw mockApiError('로그인이 필요합니다.')
+  if (!userId) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
 
   // 재고 검증: 요청 수량이 현재 재고를 초과하면 주문 생성 자체를 막는다
-  const insufficient = items.find(
-    ({ productId, quantity }) => quantity > getMockStock(Number(productId))
+  const insufficient = orderItems.find(
+    ({ bookId, quantity }) => quantity > getMockStock(Number(bookId))
   )
   if (insufficient) {
-    throw mockApiError('재고가 부족합니다')
+    throw mockApiError('재고가 부족합니다', 'OUT_OF_STOCK')
   }
 
-  const orderItems = items.map(({ productId, quantity }) => {
-    const product = MOCK_PRODUCTS.find((p) => p.id === Number(productId))
+  const items = orderItems.map(({ bookId, quantity }) => {
+    const book = MOCK_BOOKS.find((b) => b.bookId === Number(bookId))
     return {
-      productId: Number(productId),
+      bookId: Number(bookId),
       quantity,
-      title: product?.title ?? '알 수 없는 도서',
-      price: product?.price ?? 0,
+      title: book?.title ?? '알 수 없는 도서',
+      price: book?.price ?? 0,
     }
   })
-  const totalPrice = orderItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
+  const totalAmount = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
 
   const orders = readMockList(ORDERS_KEY)
   const order = {
     id: nextMockId(orders),
     userId,
-    items: orderItems,
-    totalPrice,
-    status: 'PENDING',
+    orderItems: items,
+    totalAmount,
+    orderStatus: 'PENDING_PAYMENT',
     createdAt: new Date().toISOString(),
   }
   writeMockList(ORDERS_KEY, [...orders, order])
-  return { data: order }
+  return { data: toCreateResponse(order) }
 }
 
 export const mockGetMyOrders = () => {
@@ -49,7 +55,7 @@ export const mockGetMyOrders = () => {
 
 export const mockGetOrderDetail = (orderId) => {
   const order = readMockList(ORDERS_KEY).find((o) => o.id === Number(orderId))
-  if (!order) throw mockApiError('주문을 찾을 수 없습니다.')
+  if (!order) throw mockApiError('주문을 찾을 수 없습니다.', 'ORDER_NOT_FOUND')
   return { data: order }
 }
 
@@ -57,10 +63,10 @@ export const mockGetOrderDetail = (orderId) => {
 export const getMockOrderById = (orderId) =>
   readMockList(ORDERS_KEY).find((o) => o.id === orderId)
 
-export const markMockOrderCompleted = (orderId) => {
+export const setMockOrderStatus = (orderId, orderStatus) => {
   const orders = readMockList(ORDERS_KEY)
   writeMockList(
     ORDERS_KEY,
-    orders.map((o) => (o.id === orderId ? { ...o, status: 'COMPLETED' } : o))
+    orders.map((o) => (o.id === orderId ? { ...o, orderStatus } : o))
   )
 }

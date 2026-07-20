@@ -2,25 +2,25 @@ import { readMockList, writeMockList, nextMockId, mockApiError } from './mockSto
 import { getMockSessionUserId } from './mockSession'
 
 export const CARDS_KEY = 'bookmeogeun-mock-cards'
-const CREDIT_LIMIT = 500000
+const DEFAULT_MONTHLY_LIMIT = 1000000
 
 const randomDigits = (length) =>
   Array.from({ length }, () => Math.floor(Math.random() * 10)).join('')
 
 const generateMaskedCardNumber = () => `${randomDigits(4)}-****-****-${randomDigits(4)}`
 
-export const mockIssueCard = () => {
+export const mockIssueCard = ({ monthlyLimit } = {}) => {
   const userId = getMockSessionUserId()
-  if (!userId) throw mockApiError('로그인이 필요합니다.')
+  if (!userId) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
 
   const cards = readMockList(CARDS_KEY)
   const card = {
     id: nextMockId(cards),
     userId,
     maskedCardNumber: generateMaskedCardNumber(),
-    status: 'ACTIVE',
-    creditLimit: CREDIT_LIMIT,
-    remainingLimit: CREDIT_LIMIT,
+    cardStatus: 'ACTIVE',
+    monthlyLimit: Number(monthlyLimit) > 0 ? Number(monthlyLimit) : DEFAULT_MONTHLY_LIMIT,
+    currentUsage: 0,
     createdAt: new Date().toISOString(),
   }
   writeMockList(CARDS_KEY, [...cards, card])
@@ -37,10 +37,13 @@ export const mockGetMyCards = () => {
 export const getMockCardById = (cardId) =>
   readMockList(CARDS_KEY).find((c) => c.id === cardId)
 
-export const adjustMockCardLimit = (cardId, delta) => {
+// delta > 0: 결제로 사용액 증가, delta < 0: 취소/환불로 사용액 감소
+export const adjustMockCardUsage = (cardId, delta) => {
   const cards = readMockList(CARDS_KEY)
   writeMockList(
     CARDS_KEY,
-    cards.map((c) => (c.id === cardId ? { ...c, remainingLimit: c.remainingLimit + delta } : c))
+    cards.map((c) =>
+      c.id === cardId ? { ...c, currentUsage: Math.max(0, c.currentUsage + delta) } : c
+    )
   )
 }

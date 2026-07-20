@@ -7,7 +7,7 @@ export default function ProductCard({ product }) {
 
   return (
     <Link
-      to={`/products/${product.id}`}
+      to={`/products/${product.bookId}`}
       className="relative block rounded-lg overflow-hidden border hover:shadow-md transition-shadow"
       style={{ borderColor: 'var(--color-line)', background: 'var(--color-paper-soft)' }}
     >
@@ -23,9 +23,9 @@ export default function ProductCard({ product }) {
       )}
 
       <div className="aspect-[3/4] flex items-center justify-center" style={{ background: 'var(--color-line)' }}>
-        {product.coverImageUrl ? (
+        {product.imageUrl ? (
           <img
-            src={product.coverImageUrl}
+            src={product.imageUrl}
             alt={product.title}
             className="w-full h-full object-cover"
             style={outOfStock ? { opacity: 0.5 } : undefined}

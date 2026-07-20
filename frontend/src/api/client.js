@@ -22,6 +22,9 @@ apiClient.interceptors.request.use((config) => {
 })
 
 // 응답 인터셉터: 401(인증 만료) 공통 처리
+// 백엔드 에러 응답은 { errorCode, message } 형태로 내려온다. 여기서 별도로 가공하지 않고
+// error.response를 그대로 reject하므로, 호출부에서 err.response?.data?.message /
+// err.response?.data?.errorCode 로 그대로 꺼내 쓸 수 있다.
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {

@@ -1,7 +1,7 @@
 import apiClient from './client'
 import { mockCreateOrder, mockGetMyOrders, mockGetOrderDetail } from './mockOrders'
 
-// REQ-04: 주문 생성 (초기 상태 PENDING)
+// REQ-04: 주문 생성 (초기 상태 PENDING_PAYMENT)
 export const createOrder = async (payload) => {
   try {
     return await apiClient.post('/api/orders', payload)
@@ -10,12 +10,13 @@ export const createOrder = async (payload) => {
     return mockCreateOrder(payload)
   }
 }
-// payload 예시: { productId, quantity }
+// payload 예시: { orderItems: [{ bookId, quantity }] }
+// 응답 예시: { orderId, totalAmount, orderStatus }
 
 // 내 주문 목록 조회
 export const getMyOrders = async () => {
   try {
-    return await apiClient.get('/api/orders/me')
+    return await apiClient.get('/api/orders')
   } catch {
     return mockGetMyOrders()
   }

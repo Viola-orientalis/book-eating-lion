@@ -19,7 +19,7 @@ export default function Layout() {
 
     const refreshCartCount = () => {
       getCart()
-        .then((res) => setCartCount(res.data.items.length))
+        .then((res) => setCartCount(res.data.length))
         .catch(() => setCartCount(0))
     }
 
@@ -66,6 +66,7 @@ export default function Layout() {
               <>
                 <Link to="/cards" style={{ color: 'var(--color-ink)' }}>내 카드</Link>
                 <Link to="/payments" style={{ color: 'var(--color-ink)' }}>결제내역</Link>
+                <Link to="/statements" style={{ color: 'var(--color-ink)' }}>명세서</Link>
                 <span style={{ color: 'var(--color-gold)' }}>{user?.name}님</span>
                 <button onClick={handleLogout} className="text-sm underline">
                   로그아웃

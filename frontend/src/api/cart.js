@@ -1,9 +1,7 @@
 import apiClient from './client'
 import { mockGetCart, mockAddCartItem, mockUpdateCartItem, mockRemoveCartItem } from './mockCart'
 
-// 내 장바구니 조회 (로그인 필요)
-// 응답 형태: { items: [...], removedItems: [{ title }] }
-// removedItems는 이번 조회에서 판매 종료(삭제)로 걸러진 상품 목록이다.
+// 내 장바구니 조회 (로그인 필요). 응답은 배열 그대로 내려온다.
 export const getCart = async () => {
   try {
     return await apiClient.get('/api/cart')
@@ -21,12 +19,12 @@ export const addCartItem = async (payload) => {
     return mockAddCartItem(payload)
   }
 }
-// payload 예시: { productId, quantity }
+// payload 예시: { bookId, quantity }
 
 // 수량 변경
 export const updateCartItem = async (cartItemId, payload) => {
   try {
-    return await apiClient.patch(`/api/cart/${cartItemId}`, payload)
+    return await apiClient.put(`/api/cart/${cartItemId}`, payload)
   } catch {
     return mockUpdateCartItem(cartItemId, payload)
   }
