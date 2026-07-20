@@ -1,0 +1,17 @@
+# Gradle
+.gradle/
+**/build/
+**/bin/
+**/out/
+
+# IDE & OS
+.idea/
+*.iml
+.vscode/*
+!.vscode/settings.json
+.DS_Store
+Thumbs.db
+
+#Others
+team_discuss.md
+Q&A.md
