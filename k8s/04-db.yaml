@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: service
+metadata:
+  name: db-service
+  namespace: lion-db
+spec:
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
+  type: ClusterIP
+---
+spec:
+  type: ExternalName
+  externalName: # RDS 엔드포인트 주소
+  ports:
+  - port: 3306
+    protocol: TCP
+
+  
