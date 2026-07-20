@@ -4,7 +4,6 @@ import { getMyPayments, cancelPayment, getPaymentReceipt } from '../api/payments
 const STATUS_STYLE = {
   APPROVED: { label: '결제완료', color: 'var(--color-forest)' },
   CANCELLED: { label: '취소됨', color: 'var(--color-clay)' },
-  REJECTED: { label: '거절됨', color: 'var(--color-danger)' },
 }
 
 export default function Payments() {
@@ -24,9 +23,10 @@ export default function Payments() {
 
   const handleCancel = async (paymentId) => {
     if (!confirm('이 결제를 취소하시겠습니까?')) return
+    const cancelReason = window.prompt('취소 사유를 입력하세요', '고객 변심') || '고객 변심'
     setCancellingId(paymentId)
     try {
-      await cancelPayment(paymentId)
+      await cancelPayment(paymentId, cancelReason)
       load()
     } finally {
       setCancellingId(null)
@@ -61,7 +61,7 @@ export default function Payments() {
             const style = STATUS_STYLE[p.status] || { label: p.status, color: 'var(--color-ink)' }
             return (
               <div
-                key={p.id}
+                key={p.paymentId}
                 className="border rounded px-4 py-3 flex items-center justify-between"
                 style={{ borderColor: 'var(--color-line)', background: 'var(--color-paper-soft)' }}
               >
@@ -72,30 +72,25 @@ export default function Payments() {
                   <p className="text-xs mt-1" style={{ color: style.color }}>
                     {style.label} · {new Date(p.createdAt).toLocaleString()}
                   </p>
-                  {p.status === 'REJECTED' && p.rejectReason && (
-                    <p className="text-xs mt-0.5" style={{ color: 'var(--color-danger)' }}>
-                      사유: {p.rejectReason}
-                    </p>
-                  )}
                 </div>
 
                 <div className="flex gap-2 text-sm">
                   <button
-                    onClick={() => handleReceipt(p.id)}
-                    disabled={receiptLoadingId === p.id}
+                    onClick={() => handleReceipt(p.paymentId)}
+                    disabled={receiptLoadingId === p.paymentId}
                     className="underline disabled:opacity-50"
                     style={{ color: 'var(--color-gold)' }}
                   >
-                    {receiptLoadingId === p.id ? '불러오는 중...' : '명세서'}
+                    {receiptLoadingId === p.paymentId ? '불러오는 중...' : '명세서'}
                   </button>
                   {p.status === 'APPROVED' && (
                     <button
-                      onClick={() => handleCancel(p.id)}
-                      disabled={cancellingId === p.id}
+                      onClick={() => handleCancel(p.paymentId)}
+                      disabled={cancellingId === p.paymentId}
                       className="underline disabled:opacity-50"
                       style={{ color: 'var(--color-danger)' }}
                     >
-                      {cancellingId === p.id ? '취소 중...' : '취소'}
+                      {cancellingId === p.paymentId ? '취소 중...' : '취소'}
                     </button>
                   )}
                 </div>

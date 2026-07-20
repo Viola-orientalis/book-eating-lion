@@ -1,75 +1,57 @@
 import { readMockList, writeMockList, nextMockId, mockApiError } from './mockStorage'
 import { getMockSessionUserId } from './mockSession'
-import { MOCK_PRODUCTS } from './mockProducts'
-import { isMockProductDeleted } from './mockDeletedProducts'
+import { MOCK_BOOKS } from './mockBooks'
 
 // 실제 백엔드가 붙기 전까지 "서버 DB"를 흉내내는 임시 저장소.
-// 사용자별 장바구니 아이템을 { id(=cartItemId), userId, productId, quantity } 형태로 저장한다.
+// 사용자별 장바구니 아이템을 { id(=cartItemId), userId, bookId, quantity } 형태로 저장한다.
 export const CART_KEY = 'bookmeogeun-mock-cart'
 
-const productExists = (productId) =>
-  MOCK_PRODUCTS.some((p) => p.id === productId) && !isMockProductDeleted(productId)
-
 const toResponseItem = (item) => {
-  const product = MOCK_PRODUCTS.find((p) => p.id === item.productId)
+  const book = MOCK_BOOKS.find((b) => b.bookId === item.bookId)
   return {
     id: item.id,
-    productId: item.productId,
+    bookId: item.bookId,
     quantity: item.quantity,
-    title: product?.title ?? '알 수 없는 도서',
-    price: product?.price ?? 0,
+    title: book?.title ?? '알 수 없는 도서',
+    price: book?.price ?? 0,
   }
 }
 
+// 명세에 삭제된 도서 필터링이 없으므로, 여기서는 담긴 그대로를 반환한다.
+// (판매 종료 도서 대조는 Cart.jsx/Checkout.jsx가 getBooks()를 다시 조회해 프론트에서 처리)
 export const mockGetCart = () => {
   const userId = getMockSessionUserId()
-  if (!userId) throw mockApiError('로그인이 필요합니다.')
+  if (!userId) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
 
-  const all = readMockList(CART_KEY)
-  const mine = all.filter((i) => i.userId === userId)
-  // 판매 종료(삭제)된 상품은 조회 시점에 걸러서 응답하고, 저장소에서도 함께 정리한다
-  const valid = mine.filter((i) => productExists(i.productId))
-  const removed = mine.filter((i) => !productExists(i.productId))
-
-  if (removed.length > 0) {
-    const others = all.filter((i) => i.userId !== userId)
-    writeMockList(CART_KEY, [...others, ...valid])
-  }
-
-  // removed는 이번 조회에서 방금 걸러낸 것만 담긴다 - 한 번 걸러지면 저장소에서
-  // 사라지므로 다음 조회 때는 다시 나타나지 않는다.
-  const removedItems = removed.map((i) => ({
-    title: MOCK_PRODUCTS.find((p) => p.id === i.productId)?.title ?? '알 수 없는 도서',
-  }))
-
-  return { data: { items: valid.map(toResponseItem), removedItems } }
+  const mine = readMockList(CART_KEY).filter((i) => i.userId === userId)
+  return { data: mine.map(toResponseItem) }
 }
 
-export const mockAddCartItem = ({ productId, quantity }) => {
+export const mockAddCartItem = ({ bookId, quantity }) => {
   const userId = getMockSessionUserId()
-  if (!userId) throw mockApiError('로그인이 필요합니다.')
+  if (!userId) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
 
-  const normalizedProductId = Number(productId)
+  const normalizedBookId = Number(bookId)
   const all = readMockList(CART_KEY)
-  const existing = all.find((i) => i.userId === userId && i.productId === normalizedProductId)
+  const existing = all.find((i) => i.userId === userId && i.bookId === normalizedBookId)
 
   const updated = existing
     ? all.map((i) => (i.id === existing.id ? { ...i, quantity: i.quantity + quantity } : i))
-    : [...all, { id: nextMockId(all), userId, productId: normalizedProductId, quantity }]
+    : [...all, { id: nextMockId(all), userId, bookId: normalizedBookId, quantity }]
 
   writeMockList(CART_KEY, updated)
 
-  const saved = updated.find((i) => i.userId === userId && i.productId === normalizedProductId)
+  const saved = updated.find((i) => i.userId === userId && i.bookId === normalizedBookId)
   return { data: toResponseItem(saved) }
 }
 
 export const mockUpdateCartItem = (cartItemId, { quantity }) => {
   const userId = getMockSessionUserId()
-  if (!userId) throw mockApiError('로그인이 필요합니다.')
+  if (!userId) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
 
   const all = readMockList(CART_KEY)
   const item = all.find((i) => i.id === Number(cartItemId) && i.userId === userId)
-  if (!item) throw mockApiError('장바구니 항목을 찾을 수 없습니다.')
+  if (!item) throw mockApiError('장바구니 항목을 찾을 수 없습니다.', 'CART_ITEM_NOT_FOUND')
 
   const updatedItem = { ...item, quantity }
   writeMockList(
@@ -81,11 +63,11 @@ export const mockUpdateCartItem = (cartItemId, { quantity }) => {
 
 export const mockRemoveCartItem = (cartItemId) => {
   const userId = getMockSessionUserId()
-  if (!userId) throw mockApiError('로그인이 필요합니다.')
+  if (!userId) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
 
   const all = readMockList(CART_KEY)
   const item = all.find((i) => i.id === Number(cartItemId) && i.userId === userId)
-  if (!item) throw mockApiError('장바구니 항목을 찾을 수 없습니다.')
+  if (!item) throw mockApiError('장바구니 항목을 찾을 수 없습니다.', 'CART_ITEM_NOT_FOUND')
 
   writeMockList(
     CART_KEY,

@@ -5,7 +5,8 @@ import { notifyCartChanged } from '../api/cartEvents'
 import { createOrder } from '../api/orders'
 import { getMyCards, issueCard } from '../api/cards'
 import { requestPayment } from '../api/payments'
-import { getProducts } from '../api/products'
+import { getBooks } from '../api/books'
+import CardLimitForm from '../components/CardLimitForm'
 
 export default function Checkout() {
   const navigate = useNavigate()
@@ -14,15 +15,16 @@ export default function Checkout() {
   const [cartLoading, setCartLoading] = useState(true)
   const [cards, setCards] = useState([])
   const [selectedCardId, setSelectedCardId] = useState(null)
-  const [status, setStatus] = useState('idle') // idle | processing | approved | rejected
+  const [status, setStatus] = useState('idle') // idle | processing | approved | declined
   const [message, setMessage] = useState('')
   const [issuingCard, setIssuingCard] = useState(false)
+  const [showLimitForm, setShowLimitForm] = useState(false)
 
   const totalPrice = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
 
   useEffect(() => {
     getCart()
-      .then((res) => setItems(res.data.items))
+      .then((res) => setItems(res.data))
       .catch(() => setItems([]))
       .finally(() => setCartLoading(false))
 
@@ -34,12 +36,13 @@ export default function Checkout() {
       .catch(() => setCards([]))
   }, [])
 
-  const handleIssueCard = async () => {
+  const handleIssueCard = async (monthlyLimit) => {
     setIssuingCard(true)
     try {
-      const res = await issueCard()
+      const res = await issueCard({ monthlyLimit })
       setCards((prev) => [...prev, res.data])
       setSelectedCardId(res.data.id)
+      setShowLimitForm(false)
     } catch {
       setMessage('카드 발급에 실패했습니다. 잠시 후 다시 시도해주세요.')
     } finally {
@@ -56,36 +59,31 @@ export default function Checkout() {
     setMessage('')
     try {
       // 장바구니 페이지 확인 이후 시간차로 판매 종료됐을 수 있으니 결제 직전 한 번 더 대조
-      const productsRes = await getProducts()
-      const availableIds = new Set(productsRes.data.map((p) => p.id))
-      const deletedItem = items.find((i) => !availableIds.has(i.productId))
-      if (deletedItem) {
-        setStatus('rejected')
+      const booksRes = await getBooks({ size: 1000 })
+      const availableIds = new Set(booksRes.data.content.map((b) => b.bookId))
+      const staleItem = items.find((i) => !availableIds.has(i.bookId))
+      if (staleItem) {
+        setStatus('declined')
         setMessage(
-          `${deletedItem.title}은(는) 판매가 종료되어 결제를 진행할 수 없습니다. 장바구니에서 확인해주세요.`
+          `${staleItem.title}은(는) 판매가 종료되어 결제를 진행할 수 없습니다. 장바구니에서 확인해주세요.`
         )
         return
       }
 
-      // REQ-04: 주문 생성 (PENDING)
+      // 주문 생성 (PENDING_PAYMENT)
       const orderRes = await createOrder({
-        items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+        orderItems: items.map((i) => ({ bookId: i.bookId, quantity: i.quantity })),
       })
-      const orderId = orderRes.data.id
+      const orderId = orderRes.data.orderId
 
-      // REQ-06: 결제 검증 및 승인/거절 (카드 존재/상태/한도 순차 검증)
-      const paymentRes = await requestPayment({ orderId, cardId: selectedCardId })
+      // REQ-06: 카드 결제 요청 (카드 존재/상태/한도 순차 검증, 거절 시 에러로 응답)
+      await requestPayment({ orderId, cardId: selectedCardId })
 
-      if (paymentRes.data.status === 'APPROVED') {
-        setStatus('approved')
-        await clearCartItems(items)
-        notifyCartChanged()
-      } else {
-        setStatus('rejected')
-        setMessage(paymentRes.data.rejectReason || '결제가 거절되었습니다.')
-      }
+      setStatus('approved')
+      await clearCartItems(items)
+      notifyCartChanged()
     } catch (err) {
-      setStatus('rejected')
+      setStatus('declined')
       setMessage(err.response?.data?.message || '결제 처리 중 오류가 발생했습니다.')
     }
   }
@@ -139,45 +137,62 @@ export default function Checkout() {
       <section className="mb-6">
         <h2 className="text-sm font-medium mb-2">결제 카드</h2>
         {cards.length === 0 ? (
-          <button
-            onClick={handleIssueCard}
-            disabled={issuingCard}
-            className="w-full py-2.5 rounded border font-medium disabled:opacity-50"
-            style={{ borderColor: 'var(--color-clay)', color: 'var(--color-clay)' }}
-          >
-            {issuingCard ? '발급 중...' : '가상 카드 발급받기'}
-          </button>
+          showLimitForm ? (
+            <CardLimitForm
+              submitting={issuingCard}
+              onSubmit={handleIssueCard}
+              onCancel={() => setShowLimitForm(false)}
+            />
+          ) : (
+            <button
+              onClick={() => setShowLimitForm(true)}
+              className="w-full py-2.5 rounded border font-medium"
+              style={{ borderColor: 'var(--color-clay)', color: 'var(--color-clay)' }}
+            >
+              가상 카드 발급받기
+            </button>
+          )
         ) : (
           <div className="flex flex-col gap-2">
-            {cards.map((card) => (
-              <label
-                key={card.id}
-                className="flex items-center gap-3 border rounded px-4 py-2.5 cursor-pointer text-sm"
-                style={{
-                  borderColor: selectedCardId === card.id ? 'var(--color-clay)' : 'var(--color-line)',
-                }}
-              >
-                <input
-                  type="radio"
-                  name="card"
-                  checked={selectedCardId === card.id}
-                  onChange={() => setSelectedCardId(card.id)}
-                />
-                <span>{card.maskedCardNumber}</span>
-                <span className="ml-auto" style={{ color: 'var(--color-clay)' }}>
-                  한도 {card.remainingLimit?.toLocaleString()}원
-                </span>
-              </label>
-            ))}
+            {cards.map((card) => {
+              const remainingLimit = card.monthlyLimit - card.currentUsage
+              return (
+                <label
+                  key={card.id}
+                  className="flex items-center gap-3 border rounded px-4 py-2.5 cursor-pointer text-sm"
+                  style={{
+                    borderColor: selectedCardId === card.id ? 'var(--color-clay)' : 'var(--color-line)',
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="card"
+                    checked={selectedCardId === card.id}
+                    onChange={() => setSelectedCardId(card.id)}
+                  />
+                  <span>{card.maskedCardNumber}</span>
+                  <span className="ml-auto" style={{ color: 'var(--color-clay)' }}>
+                    한도 {remainingLimit?.toLocaleString()}원
+                  </span>
+                </label>
+              )
+            })}
 
-            <button
-              onClick={handleIssueCard}
-              disabled={issuingCard}
-              className="text-sm underline self-start mt-1 disabled:opacity-50"
-              style={{ color: 'var(--color-clay)' }}
-            >
-              {issuingCard ? '발급 중...' : '카드 추가 발급'}
-            </button>
+            {showLimitForm ? (
+              <CardLimitForm
+                submitting={issuingCard}
+                onSubmit={handleIssueCard}
+                onCancel={() => setShowLimitForm(false)}
+              />
+            ) : (
+              <button
+                onClick={() => setShowLimitForm(true)}
+                className="text-sm underline self-start mt-1"
+                style={{ color: 'var(--color-clay)' }}
+              >
+                카드 추가 발급
+              </button>
+            )}
           </div>
         )}
       </section>

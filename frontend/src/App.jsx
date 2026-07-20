@@ -9,6 +9,7 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Cards from './pages/Cards'
 import Payments from './pages/Payments'
+import Statements from './pages/Statements'
 import NotFound from './pages/NotFound'
 
 export default function App() {
@@ -49,6 +50,14 @@ export default function App() {
           element={
             <RequireAuth>
               <Payments />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="statements"
+          element={
+            <RequireAuth>
+              <Statements />
             </RequireAuth>
           }
         />

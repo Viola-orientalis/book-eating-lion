@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getProductDetail } from '../api/products'
+import { getBookDetail } from '../api/books'
 import { addCartItem } from '../api/cart'
 import { notifyCartChanged } from '../api/cartEvents'
 import { useAuth } from '../context/AuthContext'
@@ -18,7 +18,7 @@ export default function ProductDetail() {
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    getProductDetail(id).then((res) => setProduct(res.data))
+    getBookDetail(id).then((res) => setProduct(res.data))
   }, [id])
 
   if (!product) return <p className="text-sm">불러오는 중...</p>
@@ -45,7 +45,7 @@ export default function ProductDetail() {
     setCartError('')
     setSubmitting(true)
     try {
-      await addCartItem({ productId: product.id, quantity })
+      await addCartItem({ bookId: product.bookId, quantity })
       notifyCartChanged()
       setAdded(true)
     } catch {
@@ -63,7 +63,7 @@ export default function ProductDetail() {
     setCartError('')
     setSubmitting(true)
     try {
-      await addCartItem({ productId: product.id, quantity })
+      await addCartItem({ bookId: product.bookId, quantity })
       notifyCartChanged()
       navigate('/cart')
     } catch {
@@ -80,6 +80,11 @@ export default function ProductDetail() {
         <h1 className="font-display text-2xl font-bold" style={{ color: 'var(--color-ink)' }}>
           {product.title}
         </h1>
+        {(product.author || product.publisher) && (
+          <p className="text-sm mt-1" style={{ color: 'var(--color-clay)' }}>
+            {[product.author, product.publisher].filter(Boolean).join(' · ')}
+          </p>
+        )}
         <p className="text-xl font-semibold mt-2" style={{ color: 'var(--color-gold)' }}>
           {product.price?.toLocaleString()}원
         </p>

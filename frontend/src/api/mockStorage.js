@@ -28,10 +28,11 @@ export const writeMockObject = (key, obj) => {
 export const nextMockId = (list) =>
   list.reduce((max, item) => Math.max(max, item.id), 0) + 1
 
-// axios 에러와 동일한 모양(err.response.data.message)으로 던져서
-// 기존 catch(err => err.response?.data?.message) 처리 로직을 그대로 재사용
-export const mockApiError = (message) => {
+// 실제 백엔드 에러 응답 형태({ errorCode, message })와 동일한 모양으로 던져서
+// 기존 catch(err => err.response?.data?.message) 처리 로직을 그대로 재사용하면서
+// errorCode가 필요한 곳에서는 err.response.data.errorCode로 꺼내 쓸 수 있게 한다.
+export const mockApiError = (message, errorCode = 'BAD_REQUEST') => {
   const error = new Error(message)
-  error.response = { data: { message } }
+  error.response = { data: { errorCode, message } }
   return error
 }
