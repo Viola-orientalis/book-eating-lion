@@ -12,6 +12,5 @@
 .DS_Store
 Thumbs.db
 
-#Others
-team_discuss.md
-Q&A.md
+#Front
+node_modules/
