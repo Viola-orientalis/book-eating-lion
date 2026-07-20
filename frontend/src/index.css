@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+:root {
+  /* 책 먹는 사자 — 디자인 토큰 */
+  --color-ink: #1E2A38;      /* 표지 남색 — 헤더, 본문 제목 */
+  --color-paper: #F6F1E3;    /* 종이 배경 */
+  --color-paper-soft: #FBF8F1;
+  --color-gold: #B8862E;     /* 박 제목 금색 — 강조, 가격 */
+  --color-clay: #8B5A2B;     /* 사자 갈기 브라운 — 버튼, 포인트 */
+  --color-forest: #35502F;   /* 서가 초록 — 성공/완료 상태 */
+  --color-danger: #A6392B;   /* 취소/거절 상태 */
+  --color-line: #DDD3BC;     /* 구분선 */
+
+  font-family: "Pretendard", system-ui, sans-serif;
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+.font-display {
+  font-family: "Noto Serif KR", serif;
+}
+
+/* 책갈피 리본 — 카드 우측 상단에 붙는 시그니처 요소 */
+.bookmark-tag {
+  position: absolute;
+  top: 0;
+  right: 16px;
+  width: 22px;
+  height: 34px;
+  background: var(--color-clay);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
+}
+
+.divider-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-gold);
+}
