@@ -17,3 +17,6 @@ node_modules/
 
 # Secrets
 backend/src/main/resources/application.yml
+
+# Log
+logs/

@@ -12,6 +12,7 @@ import lombok.Getter;
 @Getter
 public class CustomUserDetails implements UserDetails {
 
+    private Long memberId;
     private String username; // email 용도로 사용
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
@@ -20,7 +21,8 @@ public class CustomUserDetails implements UserDetails {
     private String role;
     private String name;
 
-    public CustomUserDetails(String username, String password, String role, String name) {
+    public CustomUserDetails(Long memberId, String username, String password, String role, String name) {
+        this.memberId = memberId;
         this.username = username;
         this.password = password;
         this.role = role;
