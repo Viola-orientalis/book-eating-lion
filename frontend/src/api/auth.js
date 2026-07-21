@@ -10,7 +10,7 @@ export const signup = async (payload) => {
     return mockSignup(payload)
   }
 }
-// payload 예시: { loginId, password, name }
+// payload 예시: { username, password, name }
 
 // REQ-02: 로그인
 export const login = async (payload) => {
@@ -20,7 +20,7 @@ export const login = async (payload) => {
     return mockLogin(payload)
   }
 }
-// payload 예시: { loginId, password }
+// payload 예시: { username, password }
 // 응답 예시(평탄한 형태): { accessToken, memberId, name, role }
 
 export const logout = async () => {
@@ -41,7 +41,7 @@ export const getMyInfo = async () => {
     return mockGetMyInfo()
   }
 }
-// 응답 예시: { memberId, loginId, name, role, createdAt }
+// 응답 예시: { memberId, username, name, role, createdAt }
 
 // 회원 탈퇴
 export const deleteAccount = async () => {
