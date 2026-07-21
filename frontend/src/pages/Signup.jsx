@@ -4,7 +4,7 @@ import { signup } from '../api/auth'
 
 export default function Signup() {
   const navigate = useNavigate()
-  const [form, setForm] = useState({ loginId: '', password: '', name: '' })
+  const [form, setForm] = useState({ username: '', password: '', name: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -36,7 +36,7 @@ export default function Signup() {
       </p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <Field label="아이디" name="loginId" value={form.loginId} onChange={handleChange} />
+        <Field label="아이디" name="username" value={form.username} onChange={handleChange} />
         <Field label="비밀번호" name="password" type="password" value={form.password} onChange={handleChange} />
         <Field label="이름" name="name" value={form.name} onChange={handleChange} />
 

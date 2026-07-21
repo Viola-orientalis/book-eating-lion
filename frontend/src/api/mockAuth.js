@@ -6,20 +6,20 @@ const DEFAULT_ROLE = 'USER'
 
 const toMemberInfo = (user) => ({
   memberId: user.id,
-  loginId: user.loginId,
+  username: user.username,
   name: user.name,
   role: user.role,
   createdAt: user.createdAt,
 })
 
-export const mockSignup = ({ loginId, password, name }) => {
+export const mockSignup = ({ username, password, name }) => {
   const users = readMockList(USERS_KEY)
-  if (users.some((u) => u.loginId === loginId)) {
+  if (users.some((u) => u.username === username)) {
     throw mockApiError('이미 사용 중인 아이디입니다.', 'DUPLICATE_LOGIN_ID')
   }
   const user = {
     id: nextMockId(users),
-    loginId,
+    username,
     password,
     name,
     role: DEFAULT_ROLE,
@@ -29,9 +29,9 @@ export const mockSignup = ({ loginId, password, name }) => {
   return { data: toMemberInfo(user) }
 }
 
-export const mockLogin = ({ loginId, password }) => {
+export const mockLogin = ({ username, password }) => {
   const users = readMockList(USERS_KEY)
-  const user = users.find((u) => u.loginId === loginId && u.password === password)
+  const user = users.find((u) => u.username === username && u.password === password)
   if (!user) {
     throw mockApiError('아이디 또는 비밀번호를 확인해주세요.', 'INVALID_CREDENTIALS')
   }
