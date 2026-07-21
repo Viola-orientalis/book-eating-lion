@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext'
 export default function Login() {
   const navigate = useNavigate()
   const { setUser } = useAuth()
-  const [form, setForm] = useState({ loginId: '', password: '' })
+  const [form, setForm] = useState({ username: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -44,8 +44,8 @@ export default function Login() {
         <label className="flex flex-col gap-1 text-sm">
           <span>아이디</span>
           <input
-            name="loginId"
-            value={form.loginId}
+            name="username"
+            value={form.username}
             onChange={handleChange}
             required
             className="border rounded px-3 py-2 outline-none"
