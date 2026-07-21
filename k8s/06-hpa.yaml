@@ -2,12 +2,12 @@ apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: lion-app-hpa
-  namespace: lion-db
+  namespace: lion-app
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: mvc-app-deployment
+    name: mvcspringboot
   minReplicas: 2
   maxReplicas: 10
   metrics:
