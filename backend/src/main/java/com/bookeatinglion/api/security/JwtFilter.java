@@ -58,11 +58,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
-            } catch (io.jsonwebtoken.ExpiredJwtException e) {
-                SecurityContextHolder.clearContext();
             } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
+                // 잘못되거나 만료된 토큰이 들어오더라도 필터에서 직접 401로 끊지 않고, Context를 비운 뒤 다음 필터로 넘겨
+                // SecurityConfig의 permitAll() / authenticated() 규칙에 따라 처리되도록 함
+                SecurityContextHolder.clearContext();
             }
         }
 
