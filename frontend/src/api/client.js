@@ -1,9 +1,8 @@
 import axios from 'axios'
 
-// 백엔드(오현님) Spring Boot API 주소.
-// 로컬 개발 시 .env.local 에 VITE_API_BASE_URL=http://localhost:8080 형태로 지정
-// 배포 시 EC2 도메인/IP + 포트로 교체
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+// 프록시 기반 라우팅만 허용 (Docker Nginx 프록시 또는 CloudFront 라우팅)
+// CORS 문제를 원천 차단하기 위해 무조건 상대 경로("")만 사용합니다.
+const baseURL = ''
 
 export const apiClient = axios.create({
   baseURL,

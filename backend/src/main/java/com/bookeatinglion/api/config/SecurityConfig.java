@@ -52,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/books", "/api/books/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()
                         .anyRequest().authenticated()) // 나머지는 모두 JWT 필수
                 // 스프링 기본 인증 필터 앞에 커스텀 JWT 필터 삽입
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

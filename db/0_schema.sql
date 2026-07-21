@@ -1,3 +1,4 @@
+SET NAMES utf8mb4;
 -- DB 스키마 정의 (MySQL 기준)
 
 DROP TABLE IF EXISTS Cart_Items;

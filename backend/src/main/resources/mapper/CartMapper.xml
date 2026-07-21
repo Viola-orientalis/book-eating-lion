@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bookeatinglion.api.mapper.CartMapper">
+
+    <select id="findAllByMemberId" resultType="com.bookeatinglion.api.dto.CartDto$Response">
+        SELECT 
+            c.cart_item_id as cartItemId,
+            c.book_id as bookId,
+            b.title as title,
+            b.price as price,
+            c.quantity as quantity,
+            (b.price * c.quantity) as totalItemPrice,
+            b.image_url as imageUrl
+        FROM Cart_Items c
+        JOIN Books b ON c.book_id = b.book_id
+        WHERE c.member_id = #{memberId}
+        ORDER BY c.created_at DESC
+    </select>
+
+    <select id="findByMemberIdAndBookId" resultType="com.bookeatinglion.api.domain.CartItem">
+        SELECT *
+        FROM Cart_Items
+        WHERE member_id = #{memberId} AND book_id = #{bookId}
+    </select>
+
+    <insert id="insertCartItem" useGeneratedKeys="true" keyProperty="cartItemId">
+        INSERT INTO Cart_Items (member_id, book_id, quantity)
+        VALUES (#{memberId}, #{bookId}, #{quantity})
+    </insert>
+
+    <update id="updateQuantity">
+        UPDATE Cart_Items
+        SET quantity = #{quantity}, updated_at = NOW()
+        WHERE cart_item_id = #{cartItemId}
+    </update>
+
+    <delete id="deleteCartItem">
+        DELETE FROM Cart_Items
+        WHERE cart_item_id = #{cartItemId} AND member_id = #{memberId}
+    </delete>
+
+    <select id="findById" resultType="com.bookeatinglion.api.domain.CartItem">
+        SELECT *
+        FROM Cart_Items
+        WHERE cart_item_id = #{cartItemId}
+    </select>
+
+</mapper>
