@@ -1,13 +1,27 @@
 apiVersion: v1
 kind: ConfigMap
+# metadata:
+#   name: lion-db-config
+#   namespace: lion-db
+# data:
+#   SPRING_PROFILES_ACTIVE: "prod"
+#   SERVER_PORT: "8080"
+#   DB_HOST: "db-service"
+#   DB_PORT: "3306"
+#   DB_NAME: # 데이터베이스 이름
+#   AWS_REGION: "ap-northeast-2"
+#   S3_BUCKET_NAME: # 다이어그램의 AWS S3 버킷명
+
+# 로컬 테스트 용
 metadata:
-  name: lion-db-config
-  namespace: lion-db
+  name: springboot-config
+  namespace: lion-app
 data:
-  SPRING_PROFILES_ACTIVE: "prod"
-  SERVER_PORT: "8080"
+  SPRING_PROFILES_ACTIVE: "local"
+  SERVER_PORT: "28080"
   DB_HOST: "db-service"
   DB_PORT: "3306"
-  DB_NAME: # 이름
-  AWS_REGION: "ap-northeast-2"
-  S3_BUCKET_NAME: # 다이어그램의 AWS S3 버킷명
+  DB_NAME: testdb
+  SPRING_DATASOURCE_URL: "jdbc:mysql://db-service.lion-db.svc.cluster.local:3306/testdb?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Seoul"
+  SPRING_DATASOURCE_USERNAME: "root"
+  SPRING_SQL_INIT_CONTINUE_ON_ERROR: "true"

@@ -1,0 +1,62 @@
+# apiVersion: networking.k8s.io/v1
+# kind: NetworkPolicy
+# metadata:
+#   name: mvc-app-network-policy
+#   namespace: prod
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: mvc-app
+#   policyTypes:
+#   - Ingress
+#   - Egress
+
+#   # 1. Ingress: ALB / Ingress Controller로부터 트래픽 허용
+#   ingress:
+#   - from:
+#     - namespaceSelector:
+#         matchLabels:
+#           kubernetes.io/metadata.name: kube-system
+#     ports:
+#     - protocol: TCP
+#       port: 8080
+
+#   # 2. Egress: DNS, Primary RDS(3306), AWS S3/ECR(443) 통신 허용
+#   egress:
+#   # K8s CoreDNS 통신
+#   - to:
+#     - namespaceSelector:
+#         matchLabels:
+#           kubernetes.io/metadata.name: kube-system
+#     ports:
+#     - protocol: UDP
+#       port: 53
+#   # RDS Primary DB 통신
+#   - ports:
+#     - protocol: TCP
+#       port: 3306
+#   # AWS S3 및 ECR 통신 (HTTPS)
+#   - ports:
+#     - protocol: TCP
+#       port: 443
+
+# 로컬용
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-mysql-from-app
+  namespace: lion-db
+spec:
+  podSelector:
+    matchLabels:
+      app: mysql
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: lion-app
+      ports:
+        - protocol: TCP
+          port: 3306
