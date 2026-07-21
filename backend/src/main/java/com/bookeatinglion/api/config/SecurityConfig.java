@@ -48,7 +48,7 @@ public class SecurityConfig {
                 // 엔드포인트별 권한 규칙 설정
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Preflight 요청 허용
-                        .requestMatchers("/health").permitAll()
+                        .requestMatchers("/health", "/error").permitAll()
                         .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/books", "/api/books/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
