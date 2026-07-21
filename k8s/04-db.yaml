@@ -3,21 +3,13 @@ kind: Service
 metadata:
   name: db-service
   namespace: lion-db
-# spec:
-#   type: ExternalName
-#   externalName: # RDS 엔드포인트 주소
-#   ports:
-#   - port: 3306
-#     protocol: TCP
-
-# 로컬 용
 spec:
-  selector:
-    app: mysql
+  type: ExternalName
+  externalName: # RDS 엔드포인트 주소
   ports:
-    - port: 3306
-      targetPort: 3306
-  type: ClusterIP
+  - port: 3306
+    protocol: TCP
+
 
 
   

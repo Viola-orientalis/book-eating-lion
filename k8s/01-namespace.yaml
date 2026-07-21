@@ -9,3 +9,8 @@ metadata:
   name: lion-db
   labels:
     access-to-db: allowed
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
