@@ -31,7 +31,7 @@ export default function Cart() {
         setItems(freshItems)
 
         if (staleItems.length > 0) {
-          staleItems.forEach((item) => removeCartItem(item.id))
+          staleItems.forEach((item) => removeCartItem(item.cartItemId))
           const titles = staleItems.map((item) => item.title).join(', ')
           setRemovedNotice(`판매 종료된 도서가 장바구니에서 제거되었습니다: ${titles}`)
         }
@@ -44,11 +44,11 @@ export default function Cart() {
 
   const handleQuantityChange = async (item, nextQuantity) => {
     if (nextQuantity < 1) return
-    setBusyItemId(item.id)
+    setBusyItemId(item.cartItemId)
     try {
-      await updateCartItem(item.id, { quantity: nextQuantity })
+      await updateCartItem(item.cartItemId, { quantity: nextQuantity })
       setItems((prev) =>
-        prev.map((i) => (i.id === item.id ? { ...i, quantity: nextQuantity } : i))
+        prev.map((i) => (i.cartItemId === item.cartItemId ? { ...i, quantity: nextQuantity } : i))
       )
       notifyCartChanged()
     } finally {
@@ -57,10 +57,10 @@ export default function Cart() {
   }
 
   const handleRemove = async (item) => {
-    setBusyItemId(item.id)
+    setBusyItemId(item.cartItemId)
     try {
-      await removeCartItem(item.id)
-      setItems((prev) => prev.filter((i) => i.id !== item.id))
+      await removeCartItem(item.cartItemId)
+      setItems((prev) => prev.filter((i) => i.cartItemId !== item.cartItemId))
       notifyCartChanged()
     } finally {
       setBusyItemId(null)
@@ -131,10 +131,10 @@ export default function Cart() {
             {items.map((item) => {
               const stock = stockMap[item.bookId]
               const overStock = stock !== undefined && item.quantity > stock
-              const busy = busyItemId === item.id
+              const busy = busyItemId === item.cartItemId
               return (
                 <div
-                  key={item.id}
+                  key={item.cartItemId}
                   className="flex items-center justify-between border rounded px-4 py-3"
                   style={{ borderColor: 'var(--color-line)', background: 'var(--color-paper-soft)' }}
                 >
