@@ -1,11 +1,11 @@
 -- 데모 및 테스트용 초기 더미 데이터 (demo_data.sql)
 
 -- 1. 테스트 유저 생성 (비밀번호는 편의상 1234를 BCrypt로 암호화한 값이라 가정하거나 평문 테스트 시 수정 필요)
-INSERT INTO Members (login_id, password, name, role) 
+INSERT INTO Members (username, password, name, role) 
 VALUES ('testuser', '$2a$10$X.X/w9lD1g...', '테스트유저', 'USER');
 
 -- 2. 테스트 가맹점 유저 생성
-INSERT INTO Members (login_id, password, name, role) 
+INSERT INTO Members (username, password, name, role) 
 VALUES ('merchant01', '$2a$10$X.X/w9lD1g...', '교보문고', 'MERCHANT');
 
 -- 3. 가맹점 정보 생성
