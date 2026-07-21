@@ -1,5 +1,5 @@
 import apiClient from './client'
-import { mockSignup, mockLogin, mockLogout, mockGetMyInfo, mockDeleteAccount } from './mockAuth'
+import { mockGetMyInfo, mockDeleteAccount } from './mockAuth'
 
 // REQ-01: 회원가입
 export const signup = async (payload) => {
@@ -7,6 +7,8 @@ export const signup = async (payload) => {
     username: payload.username,
     password: payload.password,
     name: payload.name,
+    age: payload.age,
+    gender: payload.gender,
   }
   return await apiClient.post('/api/auth/signup', body)
 }
@@ -30,7 +32,11 @@ export const logout = async () => {
 }
 
 export const getMyInfo = async () => {
-  return await apiClient.get('/api/auth/me')
+  try {
+    return await apiClient.get('/api/auth/me')
+  } catch {
+    return mockGetMyInfo()
+  }
 }
 // 응답 예시: { memberId, username, name, role, createdAt }
 

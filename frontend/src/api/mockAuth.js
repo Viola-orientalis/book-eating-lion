@@ -8,11 +8,13 @@ const toMemberInfo = (user) => ({
   memberId: user.id,
   username: user.username,
   name: user.name,
+  age: user.age,
+  gender: user.gender,
   role: user.role,
   createdAt: user.createdAt,
 })
 
-export const mockSignup = ({ username, password, name }) => {
+export const mockSignup = ({ username, password, name, age, gender }) => {
   const users = readMockList(USERS_KEY)
   if (users.some((u) => u.username === username)) {
     throw mockApiError('이미 사용 중인 아이디입니다.', 'DUPLICATE_LOGIN_ID')
@@ -22,6 +24,8 @@ export const mockSignup = ({ username, password, name }) => {
     username,
     password,
     name,
+    age: age ?? null,
+    gender: gender ?? null,
     role: DEFAULT_ROLE,
     createdAt: new Date().toISOString(),
   }

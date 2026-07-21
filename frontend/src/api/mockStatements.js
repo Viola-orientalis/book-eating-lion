@@ -1,6 +1,7 @@
 import { readMockList, mockApiError } from './mockStorage'
 import { getMockSessionUserId } from './mockSession'
 import { PAYMENTS_KEY, MERCHANT_NAME } from './mockPayments'
+import { getMockCardById } from './mockCards'
 import { createOffscreenContainer, appendTextLine, renderElementToPdfUrl } from './mockPdf'
 
 // 결제 1건짜리 영수증(mockPayments.js)과 달리, "명세서"는 기간(월) 단위로 결제를
@@ -77,6 +78,11 @@ const buildStatementElement = (monthKey, payments) => {
       merchantCell.style.cssText = 'padding:4px 0;text-align:center;'
       merchantCell.textContent = p.merchantName
       row.appendChild(merchantCell)
+
+      const cardCell = document.createElement('td')
+      cardCell.style.cssText = 'padding:4px 0;text-align:center;'
+      cardCell.textContent = getMockCardById(p.cardId)?.maskedCardNumber ?? '-'
+      row.appendChild(cardCell)
 
       const amountCell = document.createElement('td')
       amountCell.style.cssText = 'padding:4px 0;text-align:right;'

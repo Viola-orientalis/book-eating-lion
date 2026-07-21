@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { logout } from '../api/auth'
@@ -10,6 +10,31 @@ export default function Layout() {
   const navigate = useNavigate()
   const location = useLocation()
   const [cartCount, setCartCount] = useState(0)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef(null)
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault()
+    const trimmed = searchTerm.trim()
+    navigate(trimmed ? `/?q=${encodeURIComponent(trimmed)}` : '/')
+  }
+
+  const handleClearSearch = () => {
+    setSearchTerm('')
+    navigate('/')
+  }
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [menuOpen])
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -29,6 +54,7 @@ export default function Layout() {
   }, [isLoggedIn, location.pathname])
 
   const handleLogout = async () => {
+    setMenuOpen(false)
     try {
       await logout()
     } finally {
@@ -49,6 +75,37 @@ export default function Layout() {
           </Link>
 
           <nav className="flex items-center gap-6 text-sm font-medium">
+            <form onSubmit={handleSearchSubmit} className="flex items-center gap-1.5">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="도서를 검색해보세요"
+                  className="w-32 sm:w-48 text-sm font-normal rounded-full border px-3.5 py-1.5 transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-clay)] focus:border-[var(--color-clay)]"
+                  style={{ borderColor: 'var(--color-line)', background: '#ffffff', color: 'var(--color-ink)' }}
+                />
+                {searchTerm && (
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    aria-label="검색어 지우기"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs leading-none text-gray-400 hover:text-gray-600 transition-colors duration-150"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              <button
+                type="submit"
+                className="text-sm px-1"
+                style={{ color: 'var(--color-clay)' }}
+                aria-label="검색"
+              >
+                검색
+              </button>
+            </form>
+
             <Link to="/" style={{ color: 'var(--color-ink)' }}>도서</Link>
             <Link to="/cart" className="relative" style={{ color: 'var(--color-ink)' }}>
               장바구니
@@ -63,15 +120,59 @@ export default function Layout() {
             </Link>
 
             {isLoggedIn ? (
-              <>
-                <Link to="/cards" style={{ color: 'var(--color-ink)' }}>내 카드</Link>
-                <Link to="/payments" style={{ color: 'var(--color-ink)' }}>결제내역</Link>
-                <Link to="/statements" style={{ color: 'var(--color-ink)' }}>명세서</Link>
-                <span style={{ color: 'var(--color-gold)' }}>{user?.name}님</span>
-                <button onClick={handleLogout} className="text-sm underline">
-                  로그아웃
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setMenuOpen((prev) => !prev)}
+                  className="flex items-center gap-1 text-sm font-medium"
+                  style={{ color: 'var(--color-gold)' }}
+                >
+                  {user?.name}님
+                  <span className="text-xs">▾</span>
                 </button>
-              </>
+
+                {menuOpen && (
+                  <div
+                    className="absolute right-0 top-full mt-2 w-44 rounded-lg border overflow-hidden z-20"
+                    style={{
+                      borderColor: 'var(--color-line)',
+                      background: 'var(--color-paper-soft)',
+                      boxShadow: '0 1px 2px rgba(30,42,56,0.06), 0 14px 28px -14px rgba(30,42,56,0.35)',
+                    }}
+                  >
+                    <Link
+                      to="/payments"
+                      onClick={() => setMenuOpen(false)}
+                      className="block px-4 py-2.5 text-sm hover:bg-[var(--color-line)]/40"
+                      style={{ color: 'var(--color-ink)' }}
+                    >
+                      결제내역
+                    </Link>
+                    <Link
+                      to="/cards"
+                      onClick={() => setMenuOpen(false)}
+                      className="block px-4 py-2.5 text-sm hover:bg-[var(--color-line)]/40"
+                      style={{ color: 'var(--color-ink)' }}
+                    >
+                      내 카드 관리
+                    </Link>
+                    <Link
+                      to="/statements"
+                      onClick={() => setMenuOpen(false)}
+                      className="block px-4 py-2.5 text-sm hover:bg-[var(--color-line)]/40"
+                      style={{ color: 'var(--color-ink)' }}
+                    >
+                      명세서 다운로드
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2.5 text-sm border-t hover:bg-[var(--color-line)]/40"
+                      style={{ color: 'var(--color-ink)', borderColor: 'var(--color-line)' }}
+                    >
+                      로그아웃
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 <Link to="/login" style={{ color: 'var(--color-ink)' }}>로그인</Link>
