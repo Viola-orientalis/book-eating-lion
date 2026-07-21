@@ -14,3 +14,6 @@ Thumbs.db
 
 #Front
 node_modules/
+
+# Secrets
+backend/src/main/resources/application.yml

@@ -46,7 +46,7 @@
 
   ```json
   {
-    "loginId": "user123",
+    "username": "user123",
     "password": "password123!",
     "name": "홍길동"
   }
@@ -69,7 +69,7 @@
 
   ```json
   {
-    "loginId": "user123",
+    "username": "user123",
     "password": "password123!"
   }
   ```
@@ -95,7 +95,7 @@
   ```json
   {
     "memberId": 1,
-    "loginId": "user123",
+    "username": "user123",
     "name": "홍길동",
     "role": "USER",
     "createdAt": "2026-07-20T10:00:00Z"
@@ -578,7 +578,7 @@
       {
         "orderId": 1001,
         "memberId": 5,
-        "loginId": "user123",
+        "username": "user123",
         "totalAmount": 60000,
         "orderStatus": "PAID",
         "createdAt": "2026-07-20T10:05:00Z"
