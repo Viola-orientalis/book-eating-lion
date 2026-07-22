@@ -5,7 +5,7 @@ metadata:
   name: frontend-service
   namespace: lion-app
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: frontend
   ports:
@@ -21,7 +21,7 @@ metadata:
   name: backend
   namespace: lion-app
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: backend
   ports:
