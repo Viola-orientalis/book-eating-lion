@@ -38,7 +38,7 @@ jobs:
         env:
           REGISTRY: 061039804626.dkr.ecr.ap-northeast-2.amazonaws.com
           REPOSITORY: my-ecr-jungje
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: build-${{ github.run_number }}
 
         run: |
           docker build \
@@ -56,11 +56,11 @@ jobs:
           kubectl apply -f "./k8s_AWS_https적용후/deploy_https_AWS.yaml"
           kubectl apply -f "./k8s_AWS_https적용후/ingress_https_AWS.yaml"
 
-      - name: Update Deployment image.github/workflows/deploy.yml
+      - name: Update Deployment image
         env:
           REGISTRY: 061039804626.dkr.ecr.ap-northeast-2.amazonaws.com
           REPOSITORY: my-ecr-jungje
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: build-${{ github.run_number }}
 
         run: |
           kubectl set image deployment/account-backend \
@@ -76,3 +76,81 @@ jobs:
           kubectl get deployment account-backend
           kubectl get pods -l app=account-backend
           kubectl get service account-backend-service
+---
+
+name: Java Spring Boot CI/CD with Docker
+
+on:
+  push:
+    branches: [ "test" ]
+    paths:
+      - 'backend/**'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x ./backend/gradlew
+      continue-on-error: true
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        file: ./backend/Dockerfile
+        push: true
+        tags: |
+          ${{ secrets.DOCKER_USERNAME }}/book-eating-lion-backend:test
+          ${{ secrets.DOCKER_USERNAME }}/book-eating-lion-backend:v${{ github.run_number }}
+          ${{ secrets.DOCKER_USERNAME }}/book-eating-lion-backend:${{ github.sha }}
+---
+
+name: Frontend CI/CD with Docker
+
+on:
+  push:
+    branches: [ "test" ]
+    paths:
+      - 'frontend/**'
+
+jobs:
+  build-and-push-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./frontend
+        file: ./frontend/Dockerfile
+        push: true
+        tags: |
+          ${{ secrets.DOCKER_USERNAME }}/book-eating-lion-frontend:test
+          ${{ secrets.DOCKER_USERNAME }}/book-eating-lion-frontend:v${{ github.run_number }}
+          ${{ secrets.DOCKER_USERNAME }}/book-eating-lion-frontend:${{ github.sha }}
