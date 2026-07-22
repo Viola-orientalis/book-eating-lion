@@ -1,78 +1,88 @@
-name: deploy account-backend
+name: Deploy Main to EKS
 
 on:
   push:
     branches:
       - main
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'k8s/**'
+      - '.github/workflows/deploy.yml'
+
+env:
+  AWS_REGION: "ap-northeast-2"
+  EKS_CLUSTER: "[여기에_EKS_클러스터명]"
+  ECR_REGISTRY: "[여기에_ECR_주소]"
+  BACKEND_REPO: "[여기에_백엔드_ECR_이름]"
+  FRONTEND_REPO: "[여기에_프론트엔드_ECR_이름]"
+  K8S_YAML_DIR: "./k8s"
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout GitHub
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
         with:
-          version: "v1.25.9"
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./backend/gradlew
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET }}
-          aws-region: ap-northeast-2
-
-      - name: Update EKS kubeconfig
-        run: |
-          aws eks update-kubeconfig \
-            --name my-cluster-jungje \
-            --region ap-northeast-2
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build and push Docker image
+      - name: Build and push Backend Image
+        run: |
+          cd ./backend
+          IMAGE_TAG=build-${{ github.run_number }}
+          docker build -t ${{ env.ECR_REGISTRY }}/${{ env.BACKEND_REPO }}:$IMAGE_TAG -f Dockerfile .
+          docker push ${{ env.ECR_REGISTRY }}/${{ env.BACKEND_REPO }}:$IMAGE_TAG
+
+      - name: Build and push Frontend Image
+        run: |
+          cd ./frontend
+          IMAGE_TAG=build-${{ github.run_number }}
+          docker build -t ${{ env.ECR_REGISTRY }}/${{ env.FRONTEND_REPO }}:$IMAGE_TAG -f Dockerfile .
+          docker push ${{ env.ECR_REGISTRY }}/${{ env.FRONTEND_REPO }}:$IMAGE_TAG
+
+      - name: Update EKS kubeconfig
+        run: |
+          aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER }} --region ${{ env.AWS_REGION }}
+
+      - name: Substitute Secrets and Apply K8s Resources
         env:
-          REGISTRY: 061039804626.dkr.ecr.ap-northeast-2.amazonaws.com
-          REPOSITORY: my-ecr-jungje
-          IMAGE_TAG: build-${{ github.run_number }}
-
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_KEY: ${{ secrets.JWT_KEY }}
+          JWT_KEYRT: ${{ secrets.JWT_KEYRT }}
         run: |
-          docker build \
-            -t $REGISTRY/$REPOSITORY:$IMAGE_TAG \
-            -f ./Dockerfile \
-            .
+          envsubst < ${{ env.K8S_YAML_DIR }}/03-secret.yaml | kubectl apply -f -
+          kubectl apply -f ${{ env.K8S_YAML_DIR }}
 
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-
-      - name: Apply Kubernetes resources
+      - name: Update K8s Deployments with new images
         run: |
-          kubectl apply -f "./k8s_AWS_https적용후/db_secret_https_AWS.yaml"
-          kubectl apply -f "./k8s_AWS_https적용후/redis_https_AWS.yaml"
-          kubectl apply -f "./k8s_AWS_https적용후/https_Cert_AWS.yaml"
-          kubectl apply -f "./k8s_AWS_https적용후/deploy_https_AWS.yaml"
-          kubectl apply -f "./k8s_AWS_https적용후/ingress_https_AWS.yaml"
+          IMAGE_TAG=build-${{ github.run_number }}
+          
+          kubectl set image deployment/backend-deployment \
+            backend=${{ env.ECR_REGISTRY }}/${{ env.BACKEND_REPO }}:$IMAGE_TAG -n lion-app
+            
+          kubectl set image deployment/frontend-deployment \
+            frontend=${{ env.ECR_REGISTRY }}/${{ env.FRONTEND_REPO }}:$IMAGE_TAG -n lion-app
 
-      - name: Update Deployment image
-        env:
-          REGISTRY: 061039804626.dkr.ecr.ap-northeast-2.amazonaws.com
-          REPOSITORY: my-ecr-jungje
-          IMAGE_TAG: build-${{ github.run_number }}
-
+      - name: Check Rollout Status
         run: |
-          kubectl set image deployment/account-backend \
-            account-backend=$REGISTRY/$REPOSITORY:$IMAGE_TAG
-
-      - name: Check Deployment rollout
-        run: |
-          kubectl rollout status deployment/account-backend \
-            --timeout=300s
-
-      - name: Check Kubernetes resources
-        run: |
-          kubectl get deployment account-backend
-          kubectl get pods -l app=account-backend
-          kubectl get service account-backend-service
+          kubectl rollout status deployment/backend-deployment -n lion-app --timeout=300s
+          kubectl rollout status deployment/frontend-deployment -n lion-app --timeout=300s
