@@ -13,6 +13,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import org.springframework.lang.NonNull;
+
 import java.io.IOException;
 
 @Component
@@ -24,9 +26,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
     // 매 API 요청마다 토큰이 유효한지 검사하는 필터
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain)
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
