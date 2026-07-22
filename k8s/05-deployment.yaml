@@ -30,7 +30,7 @@ spec:
               topologyKey: "kubernetes.io/hostname"
       containers:
       - name: frontend
-        image: <AWS_ACCOUNT_ID>.dkr.ecr.ap-northeast-2.amazonaws.com/lion-frontend:latest
+        image: cheongomabi/book-eating-lion-frontend:test # 임시 이미지
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -87,7 +87,7 @@ spec:
               topologyKey: "kubernetes.io/hostname"
       containers:
       - name: backend
-        image: <AWS_ACCOUNT_ID>.dkr.ecr.ap-northeast-2.amazonaws.com/lion-backend:latest
+        image: cheongomabi/book-eating-lion-backend:test # 임시 이미지
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
@@ -116,72 +116,3 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 10
       terminationGracePeriodSeconds: 30
-
-# 로컬용
-# apiVersion: apps/v1
-# kind: Deployment
-# metadata:
-#   name: springboot
-#   namespace: lion-app
-# spec:
-#   strategy:
-#     type: RollingUpdate
-#     rollingUpdate:
-#       maxSurge: 1
-#       maxUnavailable: 0
-#   selector:
-#     matchLabels:
-#       app: springboot
-#   template:
-#     metadata:
-#       labels:
-#         app: springboot
-#     spec:
-#       containers:
-#         - name: springboot
-#           image: cheongomabi/fs:4.0
-#           imagePullPolicy: Always
-#           ports:
-#             - containerPort: 8080
-#           readinessProbe:
-#             httpGet:
-#               path: /home
-#               port: 8080
-#             initialDelaySeconds: 15
-#             periodSeconds: 5
-#           livenessProbe:
-#             httpGet:
-#               path: /home
-#               port: 8080
-#             initialDelaySeconds: 30
-#             periodSeconds: 10
-#             failureThreshold: 3
-#           resources:
-#             requests:
-#               cpu: 250m
-#               memory: 256Mi
-#             limits:
-#               cpu: 500m
-#               memory: 512Mi
-#           env:
-#             - name: SPRING_DATASOURCE_URL
-#               valueFrom:
-#                 configMapKeyRef:
-#                   name: springboot-config
-#                   key: SPRING_DATASOURCE_URL
-#             - name: SPRING_DATASOURCE_USERNAME
-#               valueFrom:
-#                 configMapKeyRef:
-#                   name: springboot-config
-#                   key: SPRING_DATASOURCE_USERNAME
-#             - name: SPRING_SQL_INIT_CONTINUE_ON_ERROR
-#               valueFrom:
-#                 configMapKeyRef:
-#                   name: springboot-config
-#                   key: SPRING_SQL_INIT_CONTINUE_ON_ERROR
-#             - name: SPRING_DATASOURCE_PASSWORD
-#               valueFrom:
-#                 secretKeyRef:
-#                   name: springboot-app-secret
-#                   key: SPRING_DATASOURCE_PASSWORD
-# ---

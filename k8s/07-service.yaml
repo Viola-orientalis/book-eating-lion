@@ -1,6 +1,4 @@
-# ==========================================
 # 1. FRONTEND SERVICE
-# ==========================================
 apiVersion: v1
 kind: Service
 metadata:
@@ -15,9 +13,8 @@ spec:
     targetPort: 80
     protocol: TCP
 ---
-# ==========================================
+
 # 2. BACKEND SERVICE
-# ==========================================
 apiVersion: v1
 kind: Service
 metadata:
@@ -31,18 +28,3 @@ spec:
   - port: 8080
     targetPort: 8080
     protocol: TCP
-
-# 로컬용
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: springboot-service
-#   namespace: lion-app
-# spec:
-#   selector:
-#     app: springboot
-#   ports:
-#     - port: 8080
-#       targetPort: 8080
-#       nodePort: 30090
-#   type: NodePort
