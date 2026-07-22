@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { login } from '../api/auth'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
+import { getErrorMessage } from '../utils/errorMessage'
 
 export default function Login() {
   const navigate = useNavigate()
   const { setUser } = useAuth()
+  const { showError } = useToast()
   const [form, setForm] = useState({ username: '', password: '' })
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleChange = (e) =>
@@ -15,7 +17,6 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setError('')
     setLoading(true)
     try {
       const res = await login(form)
@@ -25,7 +26,7 @@ export default function Login() {
       setUser(member)
       navigate('/')
     } catch (err) {
-      setError(err.response?.data?.message || '아이디 또는 비밀번호를 확인해주세요.')
+      showError(getErrorMessage(err, '아이디 또는 비밀번호를 확인해주세요.'))
     } finally {
       setLoading(false)
     }
@@ -73,12 +74,6 @@ export default function Login() {
             value={form.password}
             onChange={handleChange}
           />
-
-          {error && (
-            <p className="text-sm" style={{ color: 'var(--color-danger)' }}>
-              {error}
-            </p>
-          )}
 
           <button
             type="submit"

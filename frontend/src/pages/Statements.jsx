@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getStatements, downloadStatement } from '../api/statements'
 import ListSkeleton from '../components/skeletons/ListSkeleton'
+import { useToast } from '../context/ToastContext'
+import { getErrorMessage } from '../utils/errorMessage'
 
 const formatDate = (date) => date.toISOString().slice(0, 10)
 
@@ -12,6 +14,7 @@ const defaultRange = () => {
 }
 
 export default function Statements() {
+  const { showError } = useToast()
   const [range, setRange] = useState(defaultRange)
   const [statements, setStatements] = useState([])
   const [loading, setLoading] = useState(false)
@@ -22,7 +25,10 @@ export default function Statements() {
     setLoading(true)
     getStatements(range)
       .then((res) => setStatements(res.data))
-      .catch(() => setStatements([]))
+      .catch((err) => {
+        setStatements([])
+        showError(getErrorMessage(err, '명세서 목록을 불러오지 못했습니다.'))
+      })
       .finally(() => {
         setLoading(false)
         setSearched(true)
@@ -45,6 +51,8 @@ export default function Statements() {
     try {
       const res = await downloadStatement(statementId)
       window.open(res.data.downloadUrl, '_blank')
+    } catch (err) {
+      showError(getErrorMessage(err, '명세서 다운로드에 실패했습니다.'))
     } finally {
       setDownloadingId(null)
     }

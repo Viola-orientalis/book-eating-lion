@@ -7,9 +7,12 @@ import { getMyCards, issueCard } from '../api/cards'
 import { requestPayment } from '../api/payments'
 import { getBooks } from '../api/books'
 import CardLimitForm from '../components/CardLimitForm'
+import { useToast } from '../context/ToastContext'
+import { getErrorMessage } from '../utils/errorMessage'
 
 export default function Checkout() {
   const navigate = useNavigate()
+  const { showError } = useToast()
 
   const [items, setItems] = useState([])
   const [cartLoading, setCartLoading] = useState(true)
@@ -44,7 +47,9 @@ export default function Checkout() {
       setSelectedCardId(res.data.id)
       setShowLimitForm(false)
     } catch {
-      setMessage('카드 발급에 실패했습니다. 잠시 후 다시 시도해주세요.')
+      const text = '카드 발급에 실패했습니다. 잠시 후 다시 시도해주세요.'
+      setMessage(text)
+      showError(text)
     } finally {
       setIssuingCard(false)
     }
@@ -63,10 +68,10 @@ export default function Checkout() {
       const availableIds = new Set(booksRes.data.content.map((b) => b.bookId))
       const staleItem = items.find((i) => !availableIds.has(i.bookId))
       if (staleItem) {
+        const text = `${staleItem.title}은(는) 판매가 종료되어 결제를 진행할 수 없습니다. 장바구니에서 확인해주세요.`
         setStatus('declined')
-        setMessage(
-          `${staleItem.title}은(는) 판매가 종료되어 결제를 진행할 수 없습니다. 장바구니에서 확인해주세요.`
-        )
+        setMessage(text)
+        showError(text)
         return
       }
 
@@ -83,8 +88,10 @@ export default function Checkout() {
       await clearCartItems(items)
       notifyCartChanged()
     } catch (err) {
+      const text = getErrorMessage(err, '결제 처리 중 오류가 발생했습니다.')
       setStatus('declined')
-      setMessage(err.response?.data?.message || '결제 처리 중 오류가 발생했습니다.')
+      setMessage(text)
+      showError(text)
     }
   }
 

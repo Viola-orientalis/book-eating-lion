@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
 import { getMyCards, issueCard } from '../api/cards'
 import CardLimitForm from '../components/CardLimitForm'
+import { useToast } from '../context/ToastContext'
+import { getErrorMessage } from '../utils/errorMessage'
 
 export default function Cards() {
+  const { showError } = useToast()
   const [cards, setCards] = useState([])
   const [loading, setLoading] = useState(true)
   const [issuing, setIssuing] = useState(false)
@@ -11,10 +14,15 @@ export default function Cards() {
   const loadCards = () => {
     getMyCards()
       .then((res) => setCards(res.data))
-      .catch(() => setCards([]))
+      .catch((err) => {
+        setCards([])
+        showError(getErrorMessage(err, '카드 목록을 불러오지 못했습니다.'))
+      })
       .finally(() => setLoading(false))
   }
 
+  // 최초 1회만 조회, loadCards/showError는 매 렌더 재생성되지만 여기선 무시해도 안전하다
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(loadCards, [])
 
   const handleIssue = async (monthlyLimit) => {
@@ -23,6 +31,8 @@ export default function Cards() {
       await issueCard({ monthlyLimit })
       setShowLimitForm(false)
       loadCards()
+    } catch (err) {
+      showError(getErrorMessage(err, '카드 발급에 실패했습니다.'))
     } finally {
       setIssuing(false)
     }

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { getMyPayments, cancelPayment, getPaymentReceipt } from '../api/payments'
 import { getStatusLabel } from '../utils/statusLabels'
 import ListSkeleton from '../components/skeletons/ListSkeleton'
+import { useToast } from '../context/ToastContext'
+import { getErrorMessage } from '../utils/errorMessage'
 
 const STATUS_COLOR = {
   APPROVED: 'var(--color-forest)',
@@ -9,6 +11,7 @@ const STATUS_COLOR = {
 }
 
 export default function Payments() {
+  const { showError } = useToast()
   const [payments, setPayments] = useState([])
   const [loading, setLoading] = useState(true)
   const [cancellingId, setCancellingId] = useState(null)
@@ -17,10 +20,15 @@ export default function Payments() {
   const load = () => {
     getMyPayments()
       .then((res) => setPayments(res.data))
-      .catch(() => setPayments([]))
+      .catch((err) => {
+        setPayments([])
+        showError(getErrorMessage(err, '결제 내역을 불러오지 못했습니다.'))
+      })
       .finally(() => setLoading(false))
   }
 
+  // 최초 1회만 조회, load/showError는 매 렌더 재생성되지만 여기선 무시해도 안전하다
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(load, [])
 
   const handleCancel = async (paymentId) => {
@@ -30,6 +38,8 @@ export default function Payments() {
     try {
       await cancelPayment(paymentId, cancelReason)
       load()
+    } catch (err) {
+      showError(getErrorMessage(err, '결제 취소에 실패했습니다.'))
     } finally {
       setCancellingId(null)
     }
@@ -40,6 +50,8 @@ export default function Payments() {
     try {
       const res = await getPaymentReceipt(paymentId)
       window.open(res.data.url, '_blank')
+    } catch (err) {
+      showError(getErrorMessage(err, '영수증을 불러오지 못했습니다.'))
     } finally {
       setReceiptLoadingId(null)
     }
