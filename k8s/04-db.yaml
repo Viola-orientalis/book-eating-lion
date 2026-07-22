@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-service
+  namespace: lion-db
+spec:
+  type: ExternalName
+  externalName: # RDS 엔드포인트 주소
+  ports:
+  - port: 3306
+    protocol: TCP
+
+
+
+  

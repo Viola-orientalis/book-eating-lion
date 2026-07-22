@@ -1,0 +1,187 @@
+# 1. FRONTEND DEPLOYMENT
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: lion-app
+  labels:
+    app: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - frontend
+              topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: frontend
+        image: <AWS_ACCOUNT_ID>.dkr.ecr.ap-northeast-2.amazonaws.com/lion-frontend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "250m"
+            memory: "256Mi"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 10
+---
+
+# BACKEND DEPLOYMENT
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  namespace: lion-app
+  labels:
+    app: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - backend
+              topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: backend
+        image: <AWS_ACCOUNT_ID>.dkr.ecr.ap-northeast-2.amazonaws.com/lion-backend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+        envFrom:
+        - configMapRef:
+            name: backend-config
+        - secretRef:
+            name: backend-secret
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 20
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      terminationGracePeriodSeconds: 30
+
+# 로컬용
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: springboot
+#   namespace: lion-app
+# spec:
+#   strategy:
+#     type: RollingUpdate
+#     rollingUpdate:
+#       maxSurge: 1
+#       maxUnavailable: 0
+#   selector:
+#     matchLabels:
+#       app: springboot
+#   template:
+#     metadata:
+#       labels:
+#         app: springboot
+#     spec:
+#       containers:
+#         - name: springboot
+#           image: cheongomabi/fs:4.0
+#           imagePullPolicy: Always
+#           ports:
+#             - containerPort: 8080
+#           readinessProbe:
+#             httpGet:
+#               path: /home
+#               port: 8080
+#             initialDelaySeconds: 15
+#             periodSeconds: 5
+#           livenessProbe:
+#             httpGet:
+#               path: /home
+#               port: 8080
+#             initialDelaySeconds: 30
+#             periodSeconds: 10
+#             failureThreshold: 3
+#           resources:
+#             requests:
+#               cpu: 250m
+#               memory: 256Mi
+#             limits:
+#               cpu: 500m
+#               memory: 512Mi
+#           env:
+#             - name: SPRING_DATASOURCE_URL
+#               valueFrom:
+#                 configMapKeyRef:
+#                   name: springboot-config
+#                   key: SPRING_DATASOURCE_URL
+#             - name: SPRING_DATASOURCE_USERNAME
+#               valueFrom:
+#                 configMapKeyRef:
+#                   name: springboot-config
+#                   key: SPRING_DATASOURCE_USERNAME
+#             - name: SPRING_SQL_INIT_CONTINUE_ON_ERROR
+#               valueFrom:
+#                 configMapKeyRef:
+#                   name: springboot-config
+#                   key: SPRING_SQL_INIT_CONTINUE_ON_ERROR
+#             - name: SPRING_DATASOURCE_PASSWORD
+#               valueFrom:
+#                 secretKeyRef:
+#                   name: springboot-app-secret
+#                   key: SPRING_DATASOURCE_PASSWORD
+# ---
