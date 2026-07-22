@@ -6,11 +6,16 @@ import { MOCK_BOOKS } from './mockBooks'
 export const STOCK_LEVELS_KEY = 'bookmeogeun-mock-stock-levels'
 
 const getStockMap = () => {
-  const stored = readMockObject(STOCK_LEVELS_KEY)
-  if (stored) return stored
-  const initial = Object.fromEntries(MOCK_BOOKS.map((b) => [b.bookId, b.stock]))
-  writeMockObject(STOCK_LEVELS_KEY, initial)
-  return initial
+  const stored = readMockObject(STOCK_LEVELS_KEY) || {}
+  let changed = false
+  MOCK_BOOKS.forEach((b) => {
+    if (!(b.bookId in stored)) {
+      stored[b.bookId] = b.stock
+      changed = true
+    }
+  })
+  if (changed) writeMockObject(STOCK_LEVELS_KEY, stored)
+  return stored
 }
 
 export const getMockStock = (bookId) => {

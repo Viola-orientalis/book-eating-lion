@@ -122,7 +122,7 @@ export default function Checkout() {
         <h2 className="text-sm font-medium mb-2">주문 상품</h2>
         <div className="border rounded px-4 py-3" style={{ borderColor: 'var(--color-line)' }}>
           {items.map((i) => (
-            <div key={i.id} className="flex justify-between text-sm py-1">
+            <div key={i.cartItemId} className="flex justify-between text-sm py-1">
               <span>{i.title} × {i.quantity}</span>
               <span>{(i.price * i.quantity).toLocaleString()}원</span>
             </div>
