@@ -1,6 +1,4 @@
-# ==========================================
 # 1. FRONTEND DEPLOYMENT
-# ==========================================
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -56,9 +54,8 @@ spec:
           initialDelaySeconds: 15
           periodSeconds: 10
 ---
-# ==========================================
-# 2. BACKEND DEPLOYMENT
-# ==========================================
+
+# BACKEND DEPLOYMENT
 apiVersion: apps/v1
 kind: Deployment
 metadata:
