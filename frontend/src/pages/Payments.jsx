@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getMyPayments, cancelPayment, getPaymentReceipt } from '../api/payments'
 import { getStatusLabel } from '../utils/statusLabels'
+import ListSkeleton from '../components/skeletons/ListSkeleton'
 
 const STATUS_COLOR = {
   APPROVED: 'var(--color-forest)',
@@ -51,7 +52,7 @@ export default function Payments() {
       </h1>
 
       {loading ? (
-        <p className="text-sm">불러오는 중...</p>
+        <ListSkeleton rows={3} />
       ) : payments.length === 0 ? (
         <p className="text-sm" style={{ color: 'var(--color-clay)' }}>
           결제 내역이 없습니다

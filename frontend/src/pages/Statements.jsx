@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getStatements, downloadStatement } from '../api/statements'
+import ListSkeleton from '../components/skeletons/ListSkeleton'
 
 const formatDate = (date) => date.toISOString().slice(0, 10)
 
@@ -87,7 +88,7 @@ export default function Statements() {
       </form>
 
       {loading ? (
-        <p className="text-sm">불러오는 중...</p>
+        <ListSkeleton rows={3} />
       ) : statements.length === 0 ? (
         <p className="text-sm" style={{ color: 'var(--color-clay)' }}>
           {searched ? '해당 기간에 명세서가 없습니다' : ''}

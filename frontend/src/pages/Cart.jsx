@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { getCart, updateCartItem, removeCartItem } from '../api/cart'
 import { getBooks } from '../api/books'
 import { notifyCartChanged } from '../api/cartEvents'
+import ListSkeleton from '../components/skeletons/ListSkeleton'
 
 export default function Cart() {
   const navigate = useNavigate()
@@ -94,7 +95,7 @@ export default function Cart() {
   }
 
   if (loading) {
-    return <p className="text-sm">불러오는 중...</p>
+    return <ListSkeleton rows={3} />
   }
 
   return (

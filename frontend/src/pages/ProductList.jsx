@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { getBooks } from '../api/books'
 import ProductCard from '../components/ProductCard'
+import BookCardSkeleton from '../components/skeletons/BookCardSkeleton'
 
 const PAGE_SIZE = 12
 const CATEGORIES = ['전체', '소설', '에세이', '역사', '인문', '과학', '자기계발', '미술']
@@ -64,7 +65,11 @@ export default function ProductList() {
       </div>
 
       {loading ? (
-        <p className="text-sm" style={{ color: 'var(--color-clay)' }}>불러오는 중...</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+            <BookCardSkeleton key={i} />
+          ))}
+        </div>
       ) : visibleProducts.length === 0 ? (
         <p className="text-sm" style={{ color: 'var(--color-clay)' }}>
           {keyword && products.length > 0 ? '검색 결과가 없습니다' : '해당 카테고리에 도서가 없습니다'}
