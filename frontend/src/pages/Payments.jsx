@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { getMyPayments, cancelPayment, getPaymentReceipt } from '../api/payments'
+import { getStatusLabel } from '../utils/statusLabels'
 
-const STATUS_STYLE = {
-  APPROVED: { label: '결제완료', color: 'var(--color-forest)' },
-  CANCELLED: { label: '취소됨', color: 'var(--color-clay)' },
+const STATUS_COLOR = {
+  APPROVED: 'var(--color-forest)',
+  CANCELLED: 'var(--color-clay)',
 }
 
 export default function Payments() {
@@ -58,7 +59,10 @@ export default function Payments() {
       ) : (
         <div className="flex flex-col gap-3">
           {payments.map((p) => {
-            const style = STATUS_STYLE[p.status] || { label: p.status, color: 'var(--color-ink)' }
+            const style = {
+              label: getStatusLabel(p.status),
+              color: STATUS_COLOR[p.status] || 'var(--color-ink)',
+            }
             return (
               <div
                 key={p.paymentId}

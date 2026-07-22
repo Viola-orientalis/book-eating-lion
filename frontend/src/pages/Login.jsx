@@ -32,50 +32,64 @@ export default function Login() {
   }
 
   return (
-    <div className="max-w-sm mx-auto">
-      <h1 className="font-display text-3xl font-bold mb-1" style={{ color: 'var(--color-ink)' }}>
-        로그인
-      </h1>
-      <p className="text-sm mb-8" style={{ color: 'var(--color-clay)' }}>
-        다시 오셨네요, 반갑습니다
-      </p>
+    <div className="max-w-md mx-auto px-4 sm:px-0">
+      <div className="text-center mb-8">
+        <h1 className="font-display text-3xl font-bold mb-1" style={{ color: 'var(--color-ink)' }}>
+          로그인
+        </h1>
+        <p className="text-sm" style={{ color: 'var(--color-clay)' }}>
+          다시 오셨네요, 반갑습니다
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm">
-          <span>아이디</span>
-          <input
-            name="username"
-            value={form.username}
-            onChange={handleChange}
-            required
-            className="border rounded px-3 py-2 outline-none"
-            style={{ borderColor: 'var(--color-line)', background: 'var(--color-paper-soft)' }}
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          <span>비밀번호</span>
-          <input
+      <div
+        className="relative overflow-hidden rounded-2xl pl-7 pr-5 py-7 sm:pl-9 sm:pr-8 sm:py-9"
+        style={{
+          background: 'var(--color-paper-soft)',
+          boxShadow: '0 1px 2px rgba(30,42,56,0.06), 0 20px 44px -22px rgba(30,42,56,0.4)',
+        }}
+      >
+        {/* 시그니처: 하드커버 책등을 연상시키는 세로 스트립 (Signup.jsx와 동일) */}
+        <span
+          aria-hidden="true"
+          className="absolute left-0 top-0 bottom-0 w-3"
+          style={{
+            background:
+              'linear-gradient(90deg, var(--color-clay), color-mix(in srgb, var(--color-clay) 78%, black))',
+          }}
+        />
+        <span
+          aria-hidden="true"
+          className="absolute left-3 top-0 bottom-0 w-px"
+          style={{ background: 'rgba(0,0,0,0.18)' }}
+        />
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <Field label="아이디" name="username" value={form.username} onChange={handleChange} />
+          <Field
+            label="비밀번호"
             name="password"
             type="password"
             value={form.password}
             onChange={handleChange}
-            required
-            className="border rounded px-3 py-2 outline-none"
-            style={{ borderColor: 'var(--color-line)', background: 'var(--color-paper-soft)' }}
           />
-        </label>
 
-        {error && <p className="text-sm" style={{ color: 'var(--color-danger)' }}>{error}</p>}
+          {error && (
+            <p className="text-sm" style={{ color: 'var(--color-danger)' }}>
+              {error}
+            </p>
+          )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="mt-2 py-2.5 rounded text-white font-medium disabled:opacity-50"
-          style={{ background: 'var(--color-ink)' }}
-        >
-          {loading ? '로그인 중...' : '로그인'}
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-2 py-3 rounded-lg text-white font-medium tracking-wide transition-[filter] duration-150 enabled:hover:brightness-90 disabled:opacity-50"
+            style={{ background: 'var(--color-clay)' }}
+          >
+            {loading ? '로그인 중...' : '로그인'}
+          </button>
+        </form>
+      </div>
 
       <p className="text-sm mt-6 text-center">
         계정이 없으신가요?{' '}
@@ -84,5 +98,22 @@ export default function Login() {
         </Link>
       </p>
     </div>
+  )
+}
+
+function Field({ label, name, value, onChange, type = 'text' }) {
+  return (
+    <label className="flex flex-col gap-1.5 text-sm">
+      <span style={{ color: 'var(--color-ink)' }}>{label}</span>
+      <input
+        name={name}
+        type={type}
+        value={value}
+        onChange={onChange}
+        required
+        className="border rounded-lg px-3 py-2.5 transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-clay)] focus:border-[var(--color-clay)]"
+        style={{ borderColor: 'var(--color-line)', background: '#ffffff' }}
+      />
+    </label>
   )
 }

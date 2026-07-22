@@ -8,11 +8,13 @@ const toMemberInfo = (user) => ({
   memberId: user.id,
   username: user.username,
   name: user.name,
+  age: user.age,
+  gender: user.gender,
   role: user.role,
   createdAt: user.createdAt,
 })
 
-export const mockSignup = ({ username, password, name }) => {
+export const mockSignup = ({ username, password, name, age, gender }) => {
   const users = readMockList(USERS_KEY)
   if (users.some((u) => u.username === username)) {
     throw mockApiError('이미 사용 중인 아이디입니다.', 'DUPLICATE_LOGIN_ID')
@@ -22,6 +24,8 @@ export const mockSignup = ({ username, password, name }) => {
     username,
     password,
     name,
+    age: age ?? null,
+    gender: gender ?? null,
     role: DEFAULT_ROLE,
     createdAt: new Date().toISOString(),
   }
@@ -36,7 +40,7 @@ export const mockLogin = ({ username, password }) => {
     throw mockApiError('아이디 또는 비밀번호를 확인해주세요.', 'INVALID_CREDENTIALS')
   }
   setMockSessionUserId(user.id)
-  // 로그인 응답은 중첩 없이 평탄한 형태: { accessToken, memberId, name, role }
+  // 로그인 응답은 중첩 없이 평탄화 형태: { accessToken, memberId, name, role }
   return {
     data: {
       accessToken: `mock-access-token.${user.id}.${Date.now()}`,
@@ -62,7 +66,6 @@ export const mockGetMyInfo = () => {
 export const mockDeleteAccount = () => {
   const userId = getMockSessionUserId()
   if (!userId) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
-
   writeMockList(
     USERS_KEY,
     readMockList(USERS_KEY).filter((u) => u.id !== userId)
