@@ -34,7 +34,7 @@ export default function Checkout() {
     getMyCards()
       .then((res) => {
         setCards(res.data)
-        if (res.data.length > 0) setSelectedCardId(res.data[0].id)
+        if (res.data.length > 0) setSelectedCardId(res.data[0].cardId)
       })
       .catch(() => setCards([]))
   }, [])
@@ -44,7 +44,7 @@ export default function Checkout() {
     try {
       const res = await issueCard({ monthlyLimit })
       setCards((prev) => [...prev, res.data])
-      setSelectedCardId(res.data.id)
+      setSelectedCardId(res.data.cardId)
       setShowLimitForm(false)
     } catch {
       const text = '카드 발급에 실패했습니다. 잠시 후 다시 시도해주세요.'
@@ -165,17 +165,17 @@ export default function Checkout() {
               const remainingLimit = card.monthlyLimit - card.currentUsage
               return (
                 <label
-                  key={card.id}
+                  key={card.cardId}
                   className="flex items-center gap-3 border rounded px-4 py-2.5 cursor-pointer text-sm"
                   style={{
-                    borderColor: selectedCardId === card.id ? 'var(--color-clay)' : 'var(--color-line)',
+                    borderColor: selectedCardId === card.cardId ? 'var(--color-clay)' : 'var(--color-line)',
                   }}
                 >
                   <input
                     type="radio"
                     name="card"
-                    checked={selectedCardId === card.id}
-                    onChange={() => setSelectedCardId(card.id)}
+                    checked={selectedCardId === card.cardId}
+                    onChange={() => setSelectedCardId(card.cardId)}
                   />
                   <span>{card.maskedCardNumber}</span>
                   <span className="ml-auto" style={{ color: 'var(--color-clay)' }}>

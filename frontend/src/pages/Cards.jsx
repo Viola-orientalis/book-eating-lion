@@ -81,7 +81,7 @@ export default function Cards() {
             const remainingLimit = card.monthlyLimit - card.currentUsage
             return (
               <div
-                key={card.id}
+                key={card.cardId}
                 className="rounded-lg p-5 text-white"
                 style={{ background: 'var(--color-ink)' }}
               >

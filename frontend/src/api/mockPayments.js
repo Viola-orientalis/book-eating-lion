@@ -57,7 +57,7 @@ export const mockRequestPayment = ({ orderId, cardId, idempotencyKey }) => {
     id: nextMockId(payments),
     userId,
     orderId: order.id,
-    cardId: card.id,
+    cardId: card.cardId,
     amount: order.totalAmount,
     merchantName: MERCHANT_NAME,
     status: 'APPROVED',
@@ -66,7 +66,7 @@ export const mockRequestPayment = ({ orderId, cardId, idempotencyKey }) => {
   }
   writeMockList(PAYMENTS_KEY, [...payments, payment])
 
-  adjustMockCardUsage(card.id, order.totalAmount)
+  adjustMockCardUsage(card.cardId, order.totalAmount)
   setMockOrderStatus(order.id, 'PAID')
   order.orderItems.forEach((item) => decrementMockStock(item.bookId, item.quantity))
 
