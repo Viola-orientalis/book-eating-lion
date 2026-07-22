@@ -18,7 +18,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-service
+  name: backend
   namespace: lion-app
 spec:
   type: NodePort

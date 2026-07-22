@@ -7,7 +7,7 @@ metadata:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    # 💡 퍼블릭 서브넷 ID 작성
+    # 퍼블릭 서브넷 ID 작성
     alb.ingress.kubernetes.io/subnets: subnet-xxxxxx1, subnet-xxxxxx2
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
     # ACM SSL 인증서 적용 시 주석 해제
@@ -22,7 +22,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: backend-service
+            name: backend
             port:
               number: 8080
       # 2. 정적 웹 요청 (/*) -> Frontend Service
@@ -34,7 +34,7 @@ spec:
             port:
               number: 80
 
-# # 로컬용
+# # 로컬 테스트용
 # apiVersion: networking.k8s.io/v1
 # kind: Ingress
 # metadata:
@@ -48,10 +48,19 @@ spec:
 #     - host: finance.local
 #       http:
 #         paths:
+#           # 1. API 요청 (/api) -> Backend Service
+#           - path: /api
+#             pathType: Prefix
+#             backend:
+#               service:
+#                 name: backend
+#                 port:
+#                   number: 8080
+#           # 2. 정적 웹 요청 (/) -> Frontend Service
 #           - path: /
 #             pathType: Prefix
 #             backend:
 #               service:
-#                 name: springboot-service
+#                 name: frontend-service
 #                 port:
-#                   number: 8080
+#                   number: 80
