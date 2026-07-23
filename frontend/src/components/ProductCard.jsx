@@ -27,6 +27,7 @@ export default function ProductCard({ product }) {
           <img
             src={product.imageUrl}
             alt={product.title}
+            loading="lazy"
             className="w-full h-full object-cover"
             style={outOfStock ? { opacity: 0.5 } : undefined}
           />

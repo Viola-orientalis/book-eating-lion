@@ -5,6 +5,7 @@ import { getMockOrderById, setMockOrderStatus } from './mockOrders'
 import { decrementMockStock, incrementMockStock } from './mockStock'
 import { USERS_KEY } from './mockAuth'
 import { renderElementToPdfUrl, createOffscreenContainer, appendTextLine } from './mockPdf'
+import { getStatusLabel } from '../utils/statusLabels'
 
 export const PAYMENTS_KEY = 'bookmeogeun-mock-payments'
 export const MERCHANT_NAME = '책 먹는 사자'
@@ -56,7 +57,7 @@ export const mockRequestPayment = ({ orderId, cardId, idempotencyKey }) => {
     id: nextMockId(payments),
     userId,
     orderId: order.id,
-    cardId: card.id,
+    cardId: card.cardId,
     amount: order.totalAmount,
     merchantName: MERCHANT_NAME,
     status: 'APPROVED',
@@ -65,7 +66,7 @@ export const mockRequestPayment = ({ orderId, cardId, idempotencyKey }) => {
   }
   writeMockList(PAYMENTS_KEY, [...payments, payment])
 
-  adjustMockCardUsage(card.id, order.totalAmount)
+  adjustMockCardUsage(card.cardId, order.totalAmount)
   setMockOrderStatus(order.id, 'PAID')
   order.orderItems.forEach((item) => decrementMockStock(item.bookId, item.quantity))
 
@@ -102,7 +103,7 @@ export const mockGetMyPayments = () => {
 
 // 결제 1건짜리 즉석 영수증. 실제 "명세서"(REQ-08, 기간별)는 statements.js/mockStatements.js로
 // 분리했고, 이 함수는 결제내역 페이지의 데모용 즉석 PDF 미리보기 용도로만 남겨둔다.
-const buildReceiptElement = (payment, order, buyerName) => {
+const buildReceiptElement = (payment, order, buyerName, card) => {
   const el = createOffscreenContainer(600)
 
   const title = document.createElement('h2')
@@ -113,7 +114,8 @@ const buildReceiptElement = (payment, order, buyerName) => {
   appendTextLine(el, `구매자: ${buyerName ?? '알 수 없음'}`)
   appendTextLine(el, `결제번호: ${payment.id}`)
   appendTextLine(el, `결제일시: ${new Date(payment.createdAt).toLocaleString()}`)
-  appendTextLine(el, `상태: ${payment.status}`)
+  appendTextLine(el, `결제수단: 신용카드 (${card?.maskedCardNumber ?? '알 수 없음'})`)
+  appendTextLine(el, `상태: ${getStatusLabel(payment.status)}`)
 
   const table = document.createElement('table')
   table.style.cssText =
@@ -155,8 +157,9 @@ export const mockGetPaymentReceipt = async (paymentId) => {
 
   const order = getMockOrderById(payment.orderId)
   const buyer = readMockList(USERS_KEY).find((u) => u.id === payment.userId)
+  const card = getMockCardById(payment.cardId)
 
-  const element = buildReceiptElement(payment, order, buyer?.name)
+  const element = buildReceiptElement(payment, order, buyer?.name, card)
   const url = await renderElementToPdfUrl(element)
   return { data: { url } }
 }

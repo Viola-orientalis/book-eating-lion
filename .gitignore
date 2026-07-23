@@ -6,6 +6,7 @@
 
 # IDE & OS
 .idea/
+.vscode/
 *.iml
 .vscode/*
 !.vscode/settings.json
@@ -19,11 +20,6 @@ node_modules/
 
 # Log
 logs/
-*.md
-!README.md
-!docs/api_specification.md
-!docs/책 먹는 사자.md
-
 # Postman
 .postman/
 postman/

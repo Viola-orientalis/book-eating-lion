@@ -15,7 +15,6 @@ public class CartServiceImpl implements CartService {
     private final CartMapper cartMapper;
 
     @Override
-    @Transactional(readOnly = true)
     public List<CartDto.Response> getMyCart(Long memberId) {
         return cartMapper.findAllByMemberId(memberId);
     }

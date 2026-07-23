@@ -14,8 +14,6 @@ public class Member {
     private String username;
     private String password;
     private String name;
-    private Gender gender;
-    private Integer age;
     private Role role;
     private boolean isDeleted;
     private LocalDateTime deletedAt;

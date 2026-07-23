@@ -3,9 +3,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { getCart, updateCartItem, removeCartItem } from '../api/cart'
 import { getBooks } from '../api/books'
 import { notifyCartChanged } from '../api/cartEvents'
+import ListSkeleton from '../components/skeletons/ListSkeleton'
+import { useToast } from '../context/ToastContext'
+import { getErrorMessage } from '../utils/errorMessage'
 
 export default function Cart() {
   const navigate = useNavigate()
+  const { showError } = useToast()
   const [items, setItems] = useState([])
   const [stockMap, setStockMap] = useState({})
   const [loading, setLoading] = useState(true)
@@ -31,37 +35,46 @@ export default function Cart() {
         setItems(freshItems)
 
         if (staleItems.length > 0) {
-          staleItems.forEach((item) => removeCartItem(item.id))
+          staleItems.forEach((item) => removeCartItem(item.cartItemId))
           const titles = staleItems.map((item) => item.title).join(', ')
           setRemovedNotice(`판매 종료된 도서가 장바구니에서 제거되었습니다: ${titles}`)
         }
       })
-      .catch(() => setItems([]))
+      .catch((err) => {
+        setItems([])
+        showError(getErrorMessage(err, '장바구니를 불러오지 못했습니다.'))
+      })
       .finally(() => setLoading(false))
+    // showError는 useCallback으로 고정된 참조라 최초 1회 조회에만 의존하면 된다
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const totalPrice = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
 
   const handleQuantityChange = async (item, nextQuantity) => {
     if (nextQuantity < 1) return
-    setBusyItemId(item.id)
+    setBusyItemId(item.cartItemId)
     try {
-      await updateCartItem(item.id, { quantity: nextQuantity })
+      await updateCartItem(item.cartItemId, { quantity: nextQuantity })
       setItems((prev) =>
-        prev.map((i) => (i.id === item.id ? { ...i, quantity: nextQuantity } : i))
+        prev.map((i) => (i.cartItemId === item.cartItemId ? { ...i, quantity: nextQuantity } : i))
       )
       notifyCartChanged()
+    } catch (err) {
+      showError(getErrorMessage(err, '수량 변경에 실패했습니다.'))
     } finally {
       setBusyItemId(null)
     }
   }
 
   const handleRemove = async (item) => {
-    setBusyItemId(item.id)
+    setBusyItemId(item.cartItemId)
     try {
-      await removeCartItem(item.id)
-      setItems((prev) => prev.filter((i) => i.id !== item.id))
+      await removeCartItem(item.cartItemId)
+      setItems((prev) => prev.filter((i) => i.cartItemId !== item.cartItemId))
       notifyCartChanged()
+    } catch (err) {
+      showError(getErrorMessage(err, '삭제에 실패했습니다.'))
     } finally {
       setBusyItemId(null)
     }
@@ -94,7 +107,7 @@ export default function Cart() {
   }
 
   if (loading) {
-    return <p className="text-sm">불러오는 중...</p>
+    return <ListSkeleton rows={3} />
   }
 
   return (
@@ -131,10 +144,10 @@ export default function Cart() {
             {items.map((item) => {
               const stock = stockMap[item.bookId]
               const overStock = stock !== undefined && item.quantity > stock
-              const busy = busyItemId === item.id
+              const busy = busyItemId === item.cartItemId
               return (
                 <div
-                  key={item.id}
+                  key={item.cartItemId}
                   className="flex items-center justify-between border rounded px-4 py-3"
                   style={{ borderColor: 'var(--color-line)', background: 'var(--color-paper-soft)' }}
                 >

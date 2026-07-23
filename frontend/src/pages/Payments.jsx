@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react'
 import { getMyPayments, cancelPayment, getPaymentReceipt } from '../api/payments'
+import { getStatusLabel } from '../utils/statusLabels'
+import ListSkeleton from '../components/skeletons/ListSkeleton'
+import { useToast } from '../context/ToastContext'
+import { getErrorMessage } from '../utils/errorMessage'
 
-const STATUS_STYLE = {
-  APPROVED: { label: '결제완료', color: 'var(--color-forest)' },
-  CANCELLED: { label: '취소됨', color: 'var(--color-clay)' },
+const STATUS_COLOR = {
+  APPROVED: 'var(--color-forest)',
+  CANCELLED: 'var(--color-clay)',
 }
 
 export default function Payments() {
+  const { showError } = useToast()
   const [payments, setPayments] = useState([])
   const [loading, setLoading] = useState(true)
   const [cancellingId, setCancellingId] = useState(null)
@@ -15,10 +20,15 @@ export default function Payments() {
   const load = () => {
     getMyPayments()
       .then((res) => setPayments(res.data))
-      .catch(() => setPayments([]))
+      .catch((err) => {
+        setPayments([])
+        showError(getErrorMessage(err, '결제 내역을 불러오지 못했습니다.'))
+      })
       .finally(() => setLoading(false))
   }
 
+  // 최초 1회만 조회, load/showError는 매 렌더 재생성되지만 여기선 무시해도 안전하다
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(load, [])
 
   const handleCancel = async (paymentId) => {
@@ -28,6 +38,8 @@ export default function Payments() {
     try {
       await cancelPayment(paymentId, cancelReason)
       load()
+    } catch (err) {
+      showError(getErrorMessage(err, '결제 취소에 실패했습니다.'))
     } finally {
       setCancellingId(null)
     }
@@ -38,6 +50,8 @@ export default function Payments() {
     try {
       const res = await getPaymentReceipt(paymentId)
       window.open(res.data.url, '_blank')
+    } catch (err) {
+      showError(getErrorMessage(err, '영수증을 불러오지 못했습니다.'))
     } finally {
       setReceiptLoadingId(null)
     }
@@ -50,7 +64,7 @@ export default function Payments() {
       </h1>
 
       {loading ? (
-        <p className="text-sm">불러오는 중...</p>
+        <ListSkeleton rows={3} />
       ) : payments.length === 0 ? (
         <p className="text-sm" style={{ color: 'var(--color-clay)' }}>
           결제 내역이 없습니다
@@ -58,7 +72,10 @@ export default function Payments() {
       ) : (
         <div className="flex flex-col gap-3">
           {payments.map((p) => {
-            const style = STATUS_STYLE[p.status] || { label: p.status, color: 'var(--color-ink)' }
+            const style = {
+              label: getStatusLabel(p.status),
+              color: STATUS_COLOR[p.status] || 'var(--color-ink)',
+            }
             return (
               <div
                 key={p.paymentId}

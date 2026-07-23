@@ -35,16 +35,4 @@
         WHERE book_id = #{bookId} AND sale_status = 'ON_SALE'
     </select>
 
-    <update id="decreaseStock">
-        UPDATE Books
-        SET stock = stock - #{quantity}
-        WHERE book_id = #{bookId} AND stock &gt;= #{quantity}
-    </update>
-
-    <update id="increaseStock">
-        UPDATE Books
-        SET stock = stock + #{quantity}
-        WHERE book_id = #{bookId}
-    </update>
-
 </mapper>
