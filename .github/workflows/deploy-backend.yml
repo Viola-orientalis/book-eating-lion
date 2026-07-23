@@ -11,7 +11,7 @@ on:
 
 env:
   AWS_REGION: "ap-northeast-2"
-  EKS_CLUSTER: "[여기에_EKS_클러스터명]"
+  EKS_CLUSTER: "team3-eks-cluster"
   ECR_REGISTRY: "061039804626.dkr.ecr.ap-northeast-2.amazonaws.com/team3-back-ecr"
   BACKEND_REPO: "team3-bookstore-backend"
   K8S_YAML_DIR: "./k8s"
