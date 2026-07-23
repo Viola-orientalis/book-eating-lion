@@ -1,3 +1,47 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-security-policy
+  namespace: lion-app
+spec:
+  podSelector:
+    matchLabels:
+      app: backend
+  policyTypes:
+  - Ingress # 들어오는 트래픽 제어
+  - Egress  # 나가는 트래픽 제어
+
+  ingress:
+  # ALB Ingress (kube-system)에서 들어오는 /api 요청 허용
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+    ports:
+    - protocol: TCP
+      port: 8080
+
+  egress:
+  # K8s 내부 CoreDNS 통신 허용 (RDS 도메인 해소를 위해 필수!)
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+
+  # 외부 AWS RDS DB 통신만 허용 (3306 포트)
+  - ports:
+    - protocol: TCP
+      port: 3306
+  
+  # 외부 AWS S3 통신만 허용 (443 포트)
+  - ports:
+    - protocol: TCP
+      port: 443
+
+# # 로컬 테스트용
 # apiVersion: networking.k8s.io/v1
 # kind: NetworkPolicy
 # metadata:
@@ -16,30 +60,7 @@
 #           kubernetes.io/metadata.name: lion-app
 #       podSelector:
 #         matchLabels:
-#           app: backend # lion-app 내의 백엔드 Pod만 DB 접근 허용
+#           app: backend
 #     ports:
 #     - protocol: TCP
 #       port: 3306
-
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-mysql-from-backend
-  namespace: lion-db
-spec:
-  podSelector:
-    matchLabels:
-      app: mysql
-  policyTypes:
-  - Ingress
-  ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: lion-app
-      podSelector:
-        matchLabels:
-          app: backend
-    ports:
-    - protocol: TCP
-      port: 3306
