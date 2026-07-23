@@ -1,37 +1,79 @@
 import { useEffect, useState } from 'react'
 import { getMyPayments, cancelPayment, getPaymentReceipt } from '../api/payments'
 import { getStatusLabel } from '../utils/statusLabels'
+import ListSkeleton from '../components/skeletons/ListSkeleton'
+import Modal from '../components/Modal'
+import { useToast } from '../context/ToastContext'
+import { getErrorMessage } from '../utils/errorMessage'
 
-const STATUS_COLOR = {
+const STATUS_BADGE_COLOR = {
   APPROVED: 'var(--color-forest)',
-  CANCELLED: 'var(--color-clay)',
+  PAID: 'var(--color-forest)',
+  CANCELLED: 'var(--color-ink)',
+  PAYMENT_FAILED: 'var(--color-danger)',
+  PENDING_PAYMENT: 'var(--color-gold)',
+}
+
+const formatDateTime = (dateString) => {
+  const d = new Date(dateString)
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 export default function Payments() {
+  const { showError } = useToast()
   const [payments, setPayments] = useState([])
   const [loading, setLoading] = useState(true)
   const [cancellingId, setCancellingId] = useState(null)
   const [receiptLoadingId, setReceiptLoadingId] = useState(null)
+  const [cancelTargetId, setCancelTargetId] = useState(null)
+  const [cancelStep, setCancelStep] = useState(null) // 'confirm' | 'reason' | null
+  const [cancelReason, setCancelReason] = useState('')
 
   const load = () => {
     getMyPayments()
       .then((res) => setPayments(res.data))
-      .catch(() => setPayments([]))
+      .catch((err) => {
+        setPayments([])
+        showError(getErrorMessage(err, '결제 내역을 불러오지 못했습니다.'))
+      })
       .finally(() => setLoading(false))
   }
 
+  // 최초 1회만 조회, load/showError는 매 렌더 재생성되지만 여기선 무시해도 안전하다
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(load, [])
 
-  const handleCancel = async (paymentId) => {
-    if (!confirm('이 결제를 취소하시겠습니까?')) return
-    const cancelReason = window.prompt('취소 사유를 입력하세요', '고객 변심') || '고객 변심'
+  const handleCancel = async (paymentId, reason) => {
     setCancellingId(paymentId)
     try {
-      await cancelPayment(paymentId, cancelReason)
+      await cancelPayment(paymentId, reason)
       load()
+    } catch (err) {
+      showError(getErrorMessage(err, '결제 취소에 실패했습니다.'))
     } finally {
       setCancellingId(null)
     }
+  }
+
+  const openCancelConfirm = (paymentId) => {
+    setCancelTargetId(paymentId)
+    setCancelStep('confirm')
+  }
+
+  const closeCancelModal = () => {
+    setCancelStep(null)
+    setCancelTargetId(null)
+    setCancelReason('')
+  }
+
+  const proceedToReasonStep = () => setCancelStep('reason')
+
+  const submitCancelReason = () => {
+    const trimmed = cancelReason.trim()
+    if (!trimmed) return
+    handleCancel(cancelTargetId, trimmed)
+    closeCancelModal()
   }
 
   const handleReceipt = async (paymentId) => {
@@ -39,6 +81,8 @@ export default function Payments() {
     try {
       const res = await getPaymentReceipt(paymentId)
       window.open(res.data.url, '_blank')
+    } catch (err) {
+      showError(getErrorMessage(err, '영수증을 불러오지 못했습니다.'))
     } finally {
       setReceiptLoadingId(null)
     }
@@ -51,48 +95,58 @@ export default function Payments() {
       </h1>
 
       {loading ? (
-        <p className="text-sm">불러오는 중...</p>
+        <ListSkeleton rows={3} />
       ) : payments.length === 0 ? (
         <p className="text-sm" style={{ color: 'var(--color-clay)' }}>
           결제 내역이 없습니다
         </p>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div>
           {payments.map((p) => {
-            const style = {
-              label: getStatusLabel(p.status),
-              color: STATUS_COLOR[p.status] || 'var(--color-ink)',
-            }
+            const badgeColor = STATUS_BADGE_COLOR[p.status] || 'var(--color-ink)'
             return (
               <div
                 key={p.paymentId}
-                className="border rounded px-4 py-3 flex items-center justify-between"
-                style={{ borderColor: 'var(--color-line)', background: 'var(--color-paper-soft)' }}
+                className="rounded-xl border border-[var(--color-line)] shadow-sm hover:shadow-md transition-shadow px-4 py-4 mb-3 flex items-center justify-between"
+                style={{ background: 'var(--color-paper-soft)' }}
               >
                 <div>
-                  <p className="font-medium" style={{ color: 'var(--color-ink)' }}>
-                    {p.merchantName || '책 먹는 사자'} · {p.amount?.toLocaleString()}원
+                  <p className="text-lg font-semibold" style={{ color: 'var(--color-gold)' }}>
+                    {p.amount?.toLocaleString()}원
                   </p>
-                  <p className="text-xs mt-1" style={{ color: style.color }}>
-                    {style.label} · {new Date(p.createdAt).toLocaleString()}
+                  <p className="text-sm mt-1" style={{ color: 'var(--color-ink)' }}>
+                    {p.merchantName || '책 먹는 사자'}
                   </p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span
+                      className="rounded-full px-2 py-0.5 text-xs font-medium"
+                      style={{
+                        color: badgeColor,
+                        background: `color-mix(in srgb, ${badgeColor} 15%, white)`,
+                      }}
+                    >
+                      {getStatusLabel(p.status)}
+                    </span>
+                    <span className="text-xs" style={{ color: 'var(--color-clay)' }}>
+                      {formatDateTime(p.createdAt)}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="flex gap-2 text-sm">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleReceipt(p.paymentId)}
                     disabled={receiptLoadingId === p.paymentId}
-                    className="underline disabled:opacity-50"
-                    style={{ color: 'var(--color-gold)' }}
+                    className="text-sm px-3 py-1.5 rounded-lg border transition-colors hover:bg-[var(--color-line)]/40 disabled:opacity-50"
+                    style={{ borderColor: 'var(--color-gold)', color: 'var(--color-gold)' }}
                   >
                     {receiptLoadingId === p.paymentId ? '불러오는 중...' : '명세서'}
                   </button>
                   {p.status === 'APPROVED' && (
                     <button
-                      onClick={() => handleCancel(p.paymentId)}
+                      onClick={() => openCancelConfirm(p.paymentId)}
                       disabled={cancellingId === p.paymentId}
-                      className="underline disabled:opacity-50"
-                      style={{ color: 'var(--color-danger)' }}
+                      className="text-sm underline transition-colors disabled:opacity-50 text-[var(--color-danger)] hover:text-red-500"
                     >
                       {cancellingId === p.paymentId ? '취소 중...' : '취소'}
                     </button>
@@ -102,6 +156,64 @@ export default function Payments() {
             )
           })}
         </div>
+      )}
+
+      {cancelStep === 'confirm' && (
+        <Modal onClose={closeCancelModal}>
+          <p className="font-medium" style={{ color: 'var(--color-ink)' }}>
+            이 결제를 취소하시겠습니까?
+          </p>
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={closeCancelModal}
+              className="flex-1 py-2 rounded-lg border text-sm"
+              style={{ borderColor: 'var(--color-line)', color: 'var(--color-clay)' }}
+            >
+              닫기
+            </button>
+            <button
+              onClick={proceedToReasonStep}
+              className="flex-1 py-2 rounded-lg text-white text-sm font-medium"
+              style={{ background: 'var(--color-ink)' }}
+            >
+              확인
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {cancelStep === 'reason' && (
+        <Modal onClose={closeCancelModal}>
+          <p className="font-medium mb-3" style={{ color: 'var(--color-ink)' }}>
+            취소 사유를 입력해주세요
+          </p>
+          <input
+            type="text"
+            autoFocus
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+            placeholder="취소 사유를 입력해주세요"
+            className="w-full border rounded-lg px-3 py-2 text-sm outline-none"
+            style={{ borderColor: 'var(--color-line)' }}
+          />
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={closeCancelModal}
+              className="flex-1 py-2 rounded-lg border text-sm"
+              style={{ borderColor: 'var(--color-line)', color: 'var(--color-clay)' }}
+            >
+              닫기
+            </button>
+            <button
+              onClick={submitCancelReason}
+              disabled={!cancelReason.trim()}
+              className="flex-1 py-2 rounded-lg text-white text-sm font-medium disabled:opacity-50"
+              style={{ background: 'var(--color-ink)' }}
+            >
+              제출
+            </button>
+          </div>
+        </Modal>
       )}
     </div>
   )
