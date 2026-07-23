@@ -13,10 +13,10 @@ metadata:
     alb.ingress.kubernetes.io/ssl-redirect: '443'
 spec:
   rules:
-  - host:  # Route 53에 등록된 실제 도메인 주소 기입
+  - host: # Route 53에 등록된 실제 도메인 주소 기입
     http:
       paths:
-      # 1. API 요청 (/api/*) -> Backend Service
+      # API 요청 (/api/*) -> Backend Service
       - path: /api
         pathType: Prefix
         backend:
@@ -24,14 +24,6 @@ spec:
             name: backend
             port:
               number: 8080
-      # 2. 정적 웹 요청 (/*) -> Frontend Service
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: frontend-service
-            port:
-              number: 80
 
 # # 로컬 테스트용
 # apiVersion: networking.k8s.io/v1
