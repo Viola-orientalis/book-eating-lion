@@ -59,8 +59,10 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           JWT_KEY: ${{ secrets.JWT_KEY }}
           JWT_KEYRT: ${{ secrets.JWT_KEYRT }}
+          KAKAOPAY_SECRET_KEY: ${{ secrets.KAKAOPAY_SECRET_KEY }}
         run: |
-          envsubst < ${{ env.K8S_YAML_DIR }}/03-secret.yaml | kubectl apply -f -
+          envsubst < ${{ env.K8S_YAML_DIR }}/03-secret.yaml > ${{ env.K8S_YAML_DIR }}/03-secret.yaml.tmp
+          mv ${{ env.K8S_YAML_DIR }}/03-secret.yaml.tmp ${{ env.K8S_YAML_DIR }}/03-secret.yaml
           kubectl apply -f ${{ env.K8S_YAML_DIR }}
 
       - name: Update K8s Backend Deployment with new image
