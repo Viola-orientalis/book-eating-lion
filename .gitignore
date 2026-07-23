@@ -13,13 +13,14 @@
 .DS_Store
 Thumbs.db
 
-#Front
+# Front
 node_modules/
 
 # Secrets
 
 # Log
 logs/
+
 # Postman
 .postman/
 postman/

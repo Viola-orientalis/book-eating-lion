@@ -15,7 +15,7 @@ const toPaymentResponse = (payment) => ({
   orderId: payment.orderId,
   cardId: payment.cardId,
   amount: payment.amount,
-  merchantName: payment.merchantName,
+  orderTitle: payment.orderTitle,
   status: payment.status,
   createdAt: payment.createdAt,
 })

@@ -1,25 +1,24 @@
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: book_eating_lion_db
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: book_eating_lion
-      TZ: Asia/Seoul
-    volumes:
-      - ./db:/docker-entrypoint-initdb.d
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-      - --skip-character-set-client-handshake
-
-    healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+  # mysql:
+  #   image: mysql:8.0
+  #   container_name: book_eating_lion_db
+  #   ports:
+  #     - "3306:3306"
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: root
+  #     MYSQL_DATABASE: bookeatinglion
+  #     TZ: Asia/Seoul
+  #   volumes:
+  #     - ./db:/docker-entrypoint-initdb.d
+  #   command:
+  #     - --character-set-server=utf8mb4
+  #     - --collation-server=utf8mb4_unicode_ci
+  #     - --skip-character-set-client-handshake
+  #   healthcheck:
+  #     test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot" ]
+  #     interval: 3s
+  #     timeout: 2s
+  #     retries: 5
 
   backend:
     build:
@@ -28,10 +27,14 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DB_HOST=mysql
-    depends_on:
-      mysql:
-        condition: service_healthy
+      - TZ=Asia/Seoul
+      - DB_PRIMARY_HOST=host.docker.internal
+      - DB_REPLICA_HOST=host.docker.internal
+      - DB_USERNAME=admin
+      - DB_PASSWORD=likelion
+      - DB_NAME=bookeatinglion
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   frontend:
     build:

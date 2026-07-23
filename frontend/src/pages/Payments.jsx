@@ -105,7 +105,7 @@ export default function Payments() {
                     {p.amount?.toLocaleString()}원
                   </p>
                   <p className="text-sm mt-1" style={{ color: 'var(--color-ink)' }}>
-                    {p.merchantName || '책 먹는 사자'}
+                    {p.orderTitle}
                   </p>
                   <div className="flex items-center gap-2 mt-2">
                     <span
@@ -118,7 +118,7 @@ export default function Payments() {
                       {getStatusLabel(p.status)}
                     </span>
                     <span className="text-xs" style={{ color: 'var(--color-clay)' }}>
-                      {formatDateTime(p.createdAt)}
+                      {formatDateTime(p.approvedAt)}
                     </span>
                   </div>
                 </div>
