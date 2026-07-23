@@ -12,15 +12,6 @@ spec:
   - Egress  # 나가는 트래픽 제어
 
   ingress:
-  # 프론트엔드 Pod에서 8080 포트로 오는 요청 허용
-  - from:
-    - podSelector:
-        matchLabels:
-          app: frontend
-    ports:
-    - protocol: TCP
-      port: 8080
-
   # ALB Ingress (kube-system)에서 들어오는 /api 요청 허용
   - from:
     - namespaceSelector:
@@ -44,6 +35,11 @@ spec:
   - ports:
     - protocol: TCP
       port: 3306
+  
+  # 외부 AWS S3 통신만 허용 (443 포트)
+  - ports:
+    - protocol: TCP
+      port: 443
 
 # # 로컬 테스트용
 # apiVersion: networking.k8s.io/v1

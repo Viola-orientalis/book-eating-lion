@@ -6,16 +6,14 @@ on:
       - main
     paths:
       - 'backend/**'
-      - 'frontend/**'
       - 'k8s/**'
-      - '.github/workflows/deploy.yml'
+      - '.github/workflows/deploy-backend.yml'
 
 env:
   AWS_REGION: "ap-northeast-2"
   EKS_CLUSTER: "[여기에_EKS_클러스터명]"
-  ECR_REGISTRY: "[여기에_ECR_주소]"
-  BACKEND_REPO: "[여기에_백엔드_ECR_이름]"
-  FRONTEND_REPO: "[여기에_프론트엔드_ECR_이름]"
+  ECR_REGISTRY: "061039804626.dkr.ecr.ap-northeast-2.amazonaws.com/team3-back-ecr"
+  BACKEND_REPO: "team3-bookstore-backend"
   K8S_YAML_DIR: "./k8s"
 
 jobs:
@@ -51,13 +49,6 @@ jobs:
           docker build -t ${{ env.ECR_REGISTRY }}/${{ env.BACKEND_REPO }}:$IMAGE_TAG -f Dockerfile .
           docker push ${{ env.ECR_REGISTRY }}/${{ env.BACKEND_REPO }}:$IMAGE_TAG
 
-      - name: Build and push Frontend Image
-        run: |
-          cd ./frontend
-          IMAGE_TAG=build-${{ github.run_number }}
-          docker build -t ${{ env.ECR_REGISTRY }}/${{ env.FRONTEND_REPO }}:$IMAGE_TAG -f Dockerfile .
-          docker push ${{ env.ECR_REGISTRY }}/${{ env.FRONTEND_REPO }}:$IMAGE_TAG
-
       - name: Update EKS kubeconfig
         run: |
           aws eks update-kubeconfig --name ${{ env.EKS_CLUSTER }} --region ${{ env.AWS_REGION }}
@@ -72,17 +63,13 @@ jobs:
           envsubst < ${{ env.K8S_YAML_DIR }}/03-secret.yaml | kubectl apply -f -
           kubectl apply -f ${{ env.K8S_YAML_DIR }}
 
-      - name: Update K8s Deployments with new images
+      - name: Update K8s Backend Deployment with new image
         run: |
           IMAGE_TAG=build-${{ github.run_number }}
           
           kubectl set image deployment/backend-deployment \
             backend=${{ env.ECR_REGISTRY }}/${{ env.BACKEND_REPO }}:$IMAGE_TAG -n lion-app
-            
-          kubectl set image deployment/frontend-deployment \
-            frontend=${{ env.ECR_REGISTRY }}/${{ env.FRONTEND_REPO }}:$IMAGE_TAG -n lion-app
 
       - name: Check Rollout Status
         run: |
           kubectl rollout status deployment/backend-deployment -n lion-app --timeout=300s
-          kubectl rollout status deployment/frontend-deployment -n lion-app --timeout=300s
