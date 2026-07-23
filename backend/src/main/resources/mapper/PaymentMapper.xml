@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bookeatinglion.api.mapper.PaymentMapper">
+
+    <select id="findById" resultType="com.bookeatinglion.api.domain.Payment">
+        SELECT payment_id as paymentId,
+               order_id as orderId,
+               card_id as cardId,
+               payment_method as paymentMethod,
+               pg_tid as pgTid,
+               approval_number as approvalNumber,
+               amount,
+               payment_status as paymentStatus,
+               decline_reason as declineReason,
+               idempotency_key as idempotencyKey,
+               approved_at as approvedAt,
+               cancelled_at as cancelledAt,
+               created_at as createdAt,
+               updated_at as updatedAt
+        FROM Payments
+        WHERE payment_id = #{paymentId}
+    </select>
+
+    <select id="findByOrderId" resultType="com.bookeatinglion.api.domain.Payment">
+        SELECT payment_id as paymentId,
+               order_id as orderId,
+               card_id as cardId,
+               payment_method as paymentMethod,
+               pg_tid as pgTid,
+               approval_number as approvalNumber,
+               amount,
+               payment_status as paymentStatus,
+               decline_reason as declineReason,
+               idempotency_key as idempotencyKey,
+               approved_at as approvedAt,
+               cancelled_at as cancelledAt,
+               created_at as createdAt,
+               updated_at as updatedAt
+        FROM Payments
+        WHERE order_id = #{orderId}
+        ORDER BY payment_id DESC
+        LIMIT 1
+    </select>
+
+    <select id="findByMemberId" resultType="com.bookeatinglion.api.domain.Payment">
+        SELECT p.payment_id as paymentId,
+               p.order_id as orderId,
+               p.card_id as cardId,
+               p.payment_method as paymentMethod,
+               p.pg_tid as pgTid,
+               p.approval_number as approvalNumber,
+               p.amount,
+               p.payment_status as paymentStatus,
+               p.decline_reason as declineReason,
+               p.idempotency_key as idempotencyKey,
+               p.approved_at as approvedAt,
+               p.cancelled_at as cancelledAt,
+               p.created_at as createdAt,
+               p.updated_at as updatedAt
+        FROM Payments p
+        JOIN Orders o ON p.order_id = o.order_id
+        WHERE o.member_id = #{memberId}
+        ORDER BY p.payment_id DESC
+    </select>
+
+    <insert id="insertPayment" useGeneratedKeys="true" keyProperty="paymentId">
+        INSERT INTO Payments (order_id, card_id, payment_method, pg_tid, approval_number, amount, payment_status, decline_reason, idempotency_key, approved_at)
+        VALUES (#{orderId}, #{cardId}, #{paymentMethod}, #{pgTid}, #{approvalNumber}, #{amount}, #{paymentStatus}, #{declineReason}, #{idempotencyKey}, #{approvedAt})
+    </insert>
+
+    <update id="updateStatus">
+        UPDATE Payments
+        SET payment_status = #{status},
+            decline_reason = #{declineReason},
+            cancelled_at = CASE WHEN #{status} = 'CANCELLED' THEN CURRENT_TIMESTAMP ELSE cancelled_at END
+        WHERE payment_id = #{paymentId}
+    </update>
+
+</mapper>

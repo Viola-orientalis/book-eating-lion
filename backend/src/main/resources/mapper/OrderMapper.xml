@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bookeatinglion.api.mapper.OrderMapper">
+
+    <select id="findById" resultType="com.bookeatinglion.api.domain.Order">
+        SELECT order_id as orderId,
+               member_id as memberId,
+               total_amount as totalAmount,
+               order_status as orderStatus,
+               created_at as createdAt,
+               updated_at as updatedAt
+        FROM Orders
+        WHERE order_id = #{orderId}
+    </select>
+
+    <select id="findByMemberId" resultType="com.bookeatinglion.api.domain.Order">
+        SELECT order_id as orderId,
+               member_id as memberId,
+               total_amount as totalAmount,
+               order_status as orderStatus,
+               created_at as createdAt,
+               updated_at as updatedAt
+        FROM Orders
+        WHERE member_id = #{memberId}
+        ORDER BY order_id DESC
+    </select>
+
+    <select id="findItemsByOrderId" resultType="com.bookeatinglion.api.domain.OrderItem">
+        SELECT oi.order_item_id as orderItemId,
+               oi.order_id as orderId,
+               oi.book_id as bookId,
+               oi.quantity,
+               oi.unit_price as unitPrice,
+               b.title as bookTitle
+        FROM Order_Items oi
+        JOIN Books b ON oi.book_id = b.book_id
+        WHERE oi.order_id = #{orderId}
+    </select>
+
+    <insert id="insertOrder" useGeneratedKeys="true" keyProperty="orderId">
+        INSERT INTO Orders (member_id, total_amount, order_status)
+        VALUES (#{memberId}, #{totalAmount}, #{orderStatus})
+    </insert>
+
+    <insert id="insertOrderItem" useGeneratedKeys="true" keyProperty="orderItemId">
+        INSERT INTO Order_Items (order_id, book_id, quantity, unit_price)
+        VALUES (#{orderId}, #{bookId}, #{quantity}, #{unitPrice})
+    </insert>
+
+    <update id="updateStatus">
+        UPDATE Orders
+        SET order_status = #{status}
+        WHERE order_id = #{orderId}
+    </update>
+
+</mapper>

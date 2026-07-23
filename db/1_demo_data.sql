@@ -2,12 +2,12 @@ SET NAMES utf8mb4;
 -- 데모 및 테스트용 초기 더미 데이터 (demo_data.sql)
 
 -- 1. 테스트 유저 생성 (비밀번호는 1234)
-INSERT INTO Members (username, password, name, role) 
-VALUES ('testuser', '$2a$10$fHX4VHdsN2kPrh0GJgNjjeIb.FZJ6ApJZf5UFoUZaO.D8j3y2CqXK', '테스트유저', 'USER');
+INSERT INTO Members (username, password, name, gender, age, role) 
+VALUES ('testuser', '$2a$10$fHX4VHdsN2kPrh0GJgNjjeIb.FZJ6ApJZf5UFoUZaO.D8j3y2CqXK', '테스트유저', 'MALE', 25, 'USER');
 
 -- 2. 테스트 관리자(ADMIN) 생성 (비밀번호 1234)
-INSERT INTO Members (username, password, name, role) 
-VALUES ('admin', '$2a$10$fHX4VHdsN2kPrh0GJgNjjeIb.FZJ6ApJZf5UFoUZaO.D8j3y2CqXK', '관리자', 'ADMIN');
+INSERT INTO Members (username, password, name, gender, age, role) 
+VALUES ('admin', '$2a$10$fHX4VHdsN2kPrh0GJgNjjeIb.FZJ6ApJZf5UFoUZaO.D8j3y2CqXK', '관리자', 'MALE', 30, 'ADMIN');
 
 
 -- 3. 도서 더미 데이터 생성 (S3 URL은 임시 플레이스홀더 사용)

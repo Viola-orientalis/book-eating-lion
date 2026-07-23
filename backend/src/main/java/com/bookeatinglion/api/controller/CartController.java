@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +27,7 @@ public class CartController {
     @PostMapping
     public ResponseEntity<Map<String, Object>> addCartItem(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody CartDto.AddRequest request) {
+            @Valid @RequestBody CartDto.AddRequest request) {
         Long cartItemId = cartService.addCartItem(userDetails.getMemberId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                 "cartItemId", cartItemId,
@@ -38,7 +39,7 @@ public class CartController {
     public ResponseEntity<Map<String, String>> updateQuantity(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long cartItemId,
-            @RequestBody CartDto.UpdateRequest request) {
+            @Valid @RequestBody CartDto.UpdateRequest request) {
         cartService.updateQuantity(userDetails.getMemberId(), cartItemId, request);
         return ResponseEntity.ok(Map.of("message", "수량이 변경되었습니다."));
     }

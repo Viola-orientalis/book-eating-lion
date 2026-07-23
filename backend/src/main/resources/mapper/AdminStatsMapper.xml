@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bookeatinglion.api.mapper.AdminStatsMapper">
+
+    <select id="getTotalSalesAmount" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(total_amount), 0)
+        FROM Orders
+        WHERE order_status = 'PAID'
+    </select>
+
+    <select id="getTodaySalesAmount" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(total_amount), 0)
+        FROM Orders
+        WHERE order_status = 'PAID'
+          AND DATE(created_at) = CURRENT_DATE()
+    </select>
+
+    <select id="getTotalOrderCount" resultType="long">
+        SELECT COUNT(*)
+        FROM Orders
+        WHERE order_status = 'PAID'
+    </select>
+
+    <select id="getLowStockCount" resultType="long">
+        SELECT COUNT(*)
+        FROM Books
+        WHERE stock &lt;= 10 AND sale_status = 'ON_SALE'
+    </select>
+
+    <!-- 10대, 20대, 30대 남/여별 선호(최다 구매) 도서 통계 -->
+    <select id="selectDemographicPreferences" resultType="com.bookeatinglion.api.dto.AdminStatsDto$DemographicPreferenceDto">
+        SELECT 
+            CASE 
+                WHEN m.age BETWEEN 10 AND 19 THEN '10대'
+                WHEN m.age BETWEEN 20 AND 29 THEN '20대'
+                WHEN m.age BETWEEN 30 AND 39 THEN '30대'
+                WHEN m.age BETWEEN 40 AND 49 THEN '40대'
+                WHEN m.age BETWEEN 50 AND 59 THEN '50대'
+                ELSE '기타'
+            END AS ageGroup,
+            m.gender AS gender,
+            b.book_id AS bookId,
+            b.title AS bookTitle,
+            b.category AS category,
+            SUM(oi.quantity) AS totalQuantitySold,
+            SUM(oi.unit_price * oi.quantity) AS totalSalesAmount
+        FROM Orders o
+        JOIN Members m ON o.member_id = m.member_id
+        JOIN Order_Items oi ON o.order_id = oi.order_id
+        JOIN Books b ON oi.book_id = b.book_id
+        WHERE o.order_status = 'PAID'
+        GROUP BY ageGroup, m.gender, b.book_id, b.title, b.category
+        ORDER BY ageGroup ASC, m.gender ASC, totalQuantitySold DESC
+    </select>
+
+    <!-- 최근 7일간 일별 매출 추이 -->
+    <select id="selectSalesTrend" resultType="com.bookeatinglion.api.dto.AdminStatsDto$SalesTrendDto">
+        SELECT 
+            DATE_FORMAT(created_at, '%Y-%m-%d') AS datePeriod,
+            COUNT(order_id) AS orderCount,
+            COALESCE(SUM(total_amount), 0) AS salesAmount
+        FROM Orders
+        WHERE order_status = 'PAID'
+          AND created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY)
+        GROUP BY DATE_FORMAT(created_at, '%Y-%m-%d')
+        ORDER BY datePeriod ASC
+    </select>
+
+</mapper>
