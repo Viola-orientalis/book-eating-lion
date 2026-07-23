@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { logout } from '../api/auth'
 import { getCart } from '../api/cart'
 import { subscribeCartChanged } from '../api/cartEvents'
+import { isAdminUser, subscribeDevAdminChanged } from '../utils/adminAccess'
 
 export default function Layout() {
   const { isLoggedIn, user, setUser } = useAuth()
@@ -13,6 +14,16 @@ export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [, forceUpdateOnDevAdminChange] = useState(0)
+
+  // devAdminMode는 localStorage 값이라 리렌더를 유발하지 않으므로, 켜고 끌 때마다
+  // 강제로 다시 렌더링해서 관리자 메뉴 표시 여부를 즉시 반영한다.
+  useEffect(
+    () => subscribeDevAdminChanged(() => forceUpdateOnDevAdminChange((n) => n + 1)),
+    []
+  )
+
+  const showAdminMenu = isAdminUser(user)
 
   const handleSearchSubmit = (e) => {
     e.preventDefault()
@@ -163,6 +174,37 @@ export default function Layout() {
                     >
                       명세서 다운로드
                     </Link>
+
+                    {showAdminMenu && (
+                      <>
+                        <div className="border-t" style={{ borderColor: 'var(--color-line)' }} />
+                        <Link
+                          to="/admin/books"
+                          onClick={() => setMenuOpen(false)}
+                          className="block px-4 py-2.5 text-sm hover:bg-[var(--color-line)]/40"
+                          style={{ color: 'var(--color-ink)' }}
+                        >
+                          도서 관리
+                        </Link>
+                        <Link
+                          to="/admin/orders"
+                          onClick={() => setMenuOpen(false)}
+                          className="block px-4 py-2.5 text-sm hover:bg-[var(--color-line)]/40"
+                          style={{ color: 'var(--color-ink)' }}
+                        >
+                          전체 주문 조회
+                        </Link>
+                        <Link
+                          to="/admin/dashboard"
+                          onClick={() => setMenuOpen(false)}
+                          className="block px-4 py-2.5 text-sm hover:bg-[var(--color-line)]/40"
+                          style={{ color: 'var(--color-ink)' }}
+                        >
+                          통계 대시보드
+                        </Link>
+                      </>
+                    )}
+
                     <button
                       onClick={handleLogout}
                       className="block w-full text-left px-4 py-2.5 text-sm border-t hover:bg-[var(--color-line)]/40"

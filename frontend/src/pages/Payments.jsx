@@ -1,24 +1,11 @@
 import { useEffect, useState } from 'react'
 import { getMyPayments, cancelPayment, getPaymentReceipt } from '../api/payments'
-import { getStatusLabel } from '../utils/statusLabels'
+import { getStatusLabel, STATUS_BADGE_COLOR } from '../utils/statusLabels'
+import { formatDateTime } from '../utils/formatDate'
 import ListSkeleton from '../components/skeletons/ListSkeleton'
 import Modal from '../components/Modal'
 import { useToast } from '../context/ToastContext'
 import { getErrorMessage } from '../utils/errorMessage'
-
-const STATUS_BADGE_COLOR = {
-  APPROVED: 'var(--color-forest)',
-  PAID: 'var(--color-forest)',
-  CANCELLED: 'var(--color-ink)',
-  PAYMENT_FAILED: 'var(--color-danger)',
-  PENDING_PAYMENT: 'var(--color-gold)',
-}
-
-const formatDateTime = (dateString) => {
-  const d = new Date(dateString)
-  const pad = (n) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
-}
 
 export default function Payments() {
   const { showError } = useToast()
@@ -79,7 +66,10 @@ export default function Payments() {
   const handleReceipt = async (paymentId) => {
     setReceiptLoadingId(paymentId)
     try {
-      const res = await getPaymentReceipt(paymentId)
+      // 로컬 mock 저장소에 없는(실제 백엔드에서 온) 결제도 PDF를 만들 수 있도록,
+      // 이미 화면에 로드된 결제 데이터를 폴백으로 함께 넘긴다.
+      const fallbackPayment = payments.find((p) => p.paymentId === paymentId)
+      const res = await getPaymentReceipt(paymentId, fallbackPayment)
       window.open(res.data.url, '_blank')
     } catch (err) {
       showError(getErrorMessage(err, '영수증을 불러오지 못했습니다.'))
