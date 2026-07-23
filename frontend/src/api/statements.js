@@ -11,12 +11,3 @@ export const getStatements = async ({ startDate, endDate } = {}) => {
     return mockGetStatements({ startDate, endDate })
   }
 }
-
-// REQ-08: 명세서 다운로드 (응답: { downloadUrl })
-export const downloadStatement = async (statementId) => {
-  try {
-    return await apiClient.get(`/api/statements/${statementId}/download`)
-  } catch {
-    return mockDownloadStatement(statementId)
-  }
-}

@@ -57,9 +57,24 @@
                p.approved_at as approvedAt,
                p.cancelled_at as cancelledAt,
                p.created_at as createdAt,
-               p.updated_at as updatedAt
+               p.updated_at as updatedAt,
+               CASE 
+                   WHEN count_sub.item_count > 1 
+                       THEN CONCAT(first_item.title, ' 외 ', (count_sub.item_count - 1), '건')
+                   ELSE first_item.title
+               END as orderTitle
         FROM Payments p
         JOIN Orders o ON p.order_id = o.order_id
+        LEFT JOIN (
+            SELECT order_id, COUNT(*) as item_count, MIN(order_item_id) as min_item_id
+            FROM Order_Items
+            GROUP BY order_id
+        ) count_sub ON p.order_id = count_sub.order_id
+        LEFT JOIN (
+            SELECT oi.order_item_id, b.title
+            FROM Order_Items oi
+            JOIN Books b ON oi.book_id = b.book_id
+        ) first_item ON count_sub.min_item_id = first_item.order_item_id
         WHERE o.member_id = #{memberId}
         ORDER BY p.payment_id DESC
     </select>

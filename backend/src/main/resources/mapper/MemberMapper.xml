@@ -8,6 +8,8 @@
                username,
                password,
                name,
+               gender,
+               age,
                role,
                is_deleted as isDeleted,
                deleted_at as deletedAt,
@@ -18,8 +20,8 @@
     </select>
 
     <insert id="insertMember" useGeneratedKeys="true" keyProperty="memberId">
-        INSERT INTO Members (username, password, name, role)
-        VALUES (#{username}, #{password}, #{name}, #{role})
+        INSERT INTO Members (username, password, name, gender, age, role)
+        VALUES (#{username}, #{password}, #{name}, #{gender}, #{age}, #{role})
     </insert>
 
     <update id="softDeleteMember">

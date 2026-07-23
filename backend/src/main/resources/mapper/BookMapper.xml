@@ -35,4 +35,49 @@
         WHERE book_id = #{bookId} AND sale_status = 'ON_SALE'
     </select>
 
+    <update id="decreaseStock">
+        UPDATE Books
+        SET stock = stock - #{quantity}
+        WHERE book_id = #{bookId} AND stock &gt;= #{quantity}
+    </update>
+
+    <update id="increaseStock">
+        UPDATE Books
+        SET stock = stock + #{quantity}
+        WHERE book_id = #{bookId}
+    </update>
+
+    <insert id="insertBook" parameterType="com.bookeatinglion.api.domain.Book" useGeneratedKeys="true" keyProperty="bookId">
+        INSERT INTO Books (title, author, publisher, isbn, price, stock, category, description, image_url, sale_status)
+        VALUES (#{title}, #{author}, #{publisher}, #{isbn}, #{price}, #{stock}, #{category}, #{description}, #{imageUrl}, #{saleStatus})
+    </insert>
+
+    <update id="updateBook" parameterType="com.bookeatinglion.api.domain.Book">
+        UPDATE Books
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="author != null">author = #{author},</if>
+            <if test="publisher != null">publisher = #{publisher},</if>
+            <if test="isbn != null">isbn = #{isbn},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="stock != null">stock = #{stock},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="imageUrl != null">image_url = #{imageUrl},</if>
+            <if test="saleStatus != null">sale_status = #{saleStatus},</if>
+        </set>
+        WHERE book_id = #{bookId}
+    </update>
+
+    <update id="updateSaleStatus">
+        UPDATE Books
+        SET sale_status = #{saleStatus}
+        WHERE book_id = #{bookId}
+    </update>
+
+    <delete id="deleteBook">
+        DELETE FROM Books
+        WHERE book_id = #{bookId}
+    </delete>
+
 </mapper>

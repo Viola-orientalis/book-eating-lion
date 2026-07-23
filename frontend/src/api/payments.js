@@ -40,12 +40,11 @@ export const getMyPayments = async () => {
 
 // REQ-08: 결제 건당 즉석 명세서 다운로드 (데모/미리보기 용도로 유지)
 // 기간별 "명세서" 목록/다운로드는 statements.js를 사용한다.
-export const getPaymentReceipt = async (paymentId) => {
-  try {
-    return await apiClient.get(`/api/payments/${paymentId}/receipt`)
-  } catch {
-    return mockGetPaymentReceipt(paymentId)
-  }
+// 백엔드에 receipt API 없음 - 프론트 자체 생성만 사용
+// fallbackPayment: 실제 백엔드에서 조회한 결제라 로컬 mock 저장소에는 없는 경우를 대비해,
+// 화면에 이미 로드되어 있는 결제 목록(payments state)에서 찾은 항목을 넘겨준다.
+export const getPaymentReceipt = async (paymentId, fallbackPayment) => {
+  return mockGetPaymentReceipt(paymentId, fallbackPayment)
 }
 
 // 차후 구현: 카카오페이 연동 (POST /api/kakaopay/ready, POST /api/kakaopay/approve)

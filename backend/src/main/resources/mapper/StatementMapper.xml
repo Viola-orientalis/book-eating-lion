@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bookeatinglion.api.mapper.StatementMapper">
+
+    <select id="selectMonthlyStatements" resultType="com.bookeatinglion.api.dto.StatementDto$Response">
+        SELECT DATE_FORMAT(p.approved_at, '%Y-%m') as statementId,
+               DATE_FORMAT(DATE_SUB(p.approved_at, INTERVAL DAYOFMONTH(p.approved_at)-1 DAY), '%Y-%m-01') as periodStart,
+               DATE_FORMAT(LAST_DAY(p.approved_at), '%Y-%m-%d') as periodEnd,
+               SUM(p.amount) as totalAmount,
+               COUNT(p.payment_id) as paymentCount
+        FROM Payments p
+        JOIN Orders o ON p.order_id = o.order_id
+        WHERE o.member_id = #{memberId}
+          AND p.payment_status = 'APPROVED'
+          <if test="startDate != null and startDate != ''">
+            AND p.approved_at &gt;= CONCAT(#{startDate}, ' 00:00:00')
+          </if>
+          <if test="endDate != null and endDate != ''">
+            AND p.approved_at &lt;= CONCAT(#{endDate}, ' 23:59:59')
+          </if>
+        GROUP BY DATE_FORMAT(p.approved_at, '%Y-%m')
+        ORDER BY statementId DESC
+    </select>
+
+</mapper>

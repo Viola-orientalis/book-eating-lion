@@ -24,4 +24,6 @@ public class Payment {
     private LocalDateTime cancelledAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String orderTitle;
+
 }

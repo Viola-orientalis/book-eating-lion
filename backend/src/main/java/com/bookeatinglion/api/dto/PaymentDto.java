@@ -90,5 +90,6 @@ public class PaymentDto {
         private Long amount;
         private PaymentStatus status;
         private LocalDateTime approvedAt;
+        private String orderTitle;
     }
 }
