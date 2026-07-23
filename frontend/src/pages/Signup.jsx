@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { signup } from '../api/auth'
+import { useToast } from '../context/ToastContext'
+import { getErrorMessage } from '../utils/errorMessage'
 
 const GENDER_OPTIONS = [
   { value: 'MALE', label: '남성' },
@@ -10,6 +12,7 @@ const GENDER_OPTIONS = [
 
 export default function Signup() {
   const navigate = useNavigate()
+  const { showError } = useToast()
   const [form, setForm] = useState({
     username: '',
     password: '',
@@ -17,7 +20,6 @@ export default function Signup() {
     age: '',
     gender: '',
   })
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleChange = (e) =>
@@ -25,7 +27,6 @@ export default function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setError('')
     setLoading(true)
     try {
       // REQ-01: 일반 사용자로만 가입. 관리자 권한 부여 UI는 두지 않음(CloudTrail/IAM으로 대체)
@@ -36,7 +37,7 @@ export default function Signup() {
       })
       navigate('/login')
     } catch (err) {
-      setError(err.response?.data?.message || '회원가입에 실패했습니다.')
+      showError(getErrorMessage(err, '회원가입에 실패했습니다.'))
     } finally {
       setLoading(false)
     }
@@ -138,12 +139,6 @@ export default function Signup() {
               </div>
             </div>
           </fieldset>
-
-          {error && (
-            <p className="text-sm" style={{ color: 'var(--color-danger)' }}>
-              {error}
-            </p>
-          )}
 
           <button
             type="submit"

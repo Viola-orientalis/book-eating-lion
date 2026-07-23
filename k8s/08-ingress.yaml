@@ -1,0 +1,57 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: lion-ingress
+  namespace: lion-app
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/subnets: "subnet-0ced85efc560711fa, subnet-0da70b1209f0ce491"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-northeast-2:061039804626:certificate/6000fb1e-05bd-4cc0-b265-5a621d6b2364 # ACM 인증서 ARN
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+spec:
+  rules:
+  - host: ajttk.com # Route 53에 등록된 실제 도메인 주소 기입
+    http:
+      paths:
+      # API 요청 (/api/*) -> Backend Service
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: backend
+            port:
+              number: 8080
+
+# # 로컬 테스트용
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: todo-ingress
+#   namespace: lion-app
+#   annotations:
+#     nginx.ingress.kubernetes.io/rewrite-target: /
+# spec:
+#   ingressClassName: nginx
+#   rules:
+#     - host: finance.local
+#       http:
+#         paths:
+#           # 1. API 요청 (/api) -> Backend Service
+#           - path: /api
+#             pathType: Prefix
+#             backend:
+#               service:
+#                 name: backend
+#                 port:
+#                   number: 8080
+#           # 2. 정적 웹 요청 (/) -> Frontend Service
+#           - path: /
+#             pathType: Prefix
+#             backend:
+#               service:
+#                 name: frontend-service
+#                 port:
+#                   number: 80

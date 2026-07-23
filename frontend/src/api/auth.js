@@ -21,22 +21,20 @@ export const login = async (payload) => {
   }
   return await apiClient.post('/api/auth/login', body)
 }
+// payload 예시: { username, password }
+// 응답 예시(평탄화 형태): { accessToken, memberId, name, role }
 
 export const logout = async () => {
   try {
     return await apiClient.post('/api/auth/logout')
   } finally {
-    // JWT는 클라이언트가 들고 있는 토큰을 지우는 것으로 로그아웃 처리
+    // JWT는 클라이언트가 갖고 있는 토큰을 지우는 것으로 로그아웃 처리
     localStorage.removeItem('accessToken')
   }
 }
 
 export const getMyInfo = async () => {
-  try {
-    return await apiClient.get('/api/auth/me')
-  } catch {
-    return mockGetMyInfo()
-  }
+  return await apiClient.get('/api/auth/me')
 }
 // 응답 예시: { memberId, username, name, role, createdAt }
 

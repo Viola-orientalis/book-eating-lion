@@ -40,7 +40,7 @@ export const mockLogin = ({ username, password }) => {
     throw mockApiError('아이디 또는 비밀번호를 확인해주세요.', 'INVALID_CREDENTIALS')
   }
   setMockSessionUserId(user.id)
-  // 로그인 응답은 중첩 없이 평탄한 형태: { accessToken, memberId, name, role }
+  // 로그인 응답은 중첩 없이 평탄화 형태: { accessToken, memberId, name, role }
   return {
     data: {
       accessToken: `mock-access-token.${user.id}.${Date.now()}`,
@@ -66,7 +66,6 @@ export const mockGetMyInfo = () => {
 export const mockDeleteAccount = () => {
   const userId = getMockSessionUserId()
   if (!userId) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
-
   writeMockList(
     USERS_KEY,
     readMockList(USERS_KEY).filter((u) => u.id !== userId)

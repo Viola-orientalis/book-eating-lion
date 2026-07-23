@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: lion-app
+data:
+  SPRING_PROFILES_ACTIVE: "prod"
+  SERVER_PORT: "8080"
+  
+  DB_PRIMARY_HOST: "db-primary-service.lion-db.svc.cluster.local"
+  DB_REPLICA_HOST: "db-replica-service.lion-db.svc.cluster.local"
+
+  DB_PORT: "3306"
+  DB_NAME: database
+  AWS_REGION: "ap-northeast-2"
+  S3_BUCKET_NAME: "team3-bookeatinglion-storage-s3"
+
+# 로컬 테스트용
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: backend-config
+#   namespace: lion-app
+# data:
+#   SPRING_PROFILES_ACTIVE: "local"
+#   SERVER_PORT: "8080"
+#   DB_HOST: "db-service.lion-db.svc.cluster.local"
+#   DB_PORT: "3306"
+#   DB_NAME: "testdb"
+#   AWS_REGION: "ap-northeast-2"
+#   S3_BUCKET_NAME: "local-test-bucket"

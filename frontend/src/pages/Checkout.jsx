@@ -7,9 +7,12 @@ import { getMyCards, issueCard } from '../api/cards'
 import { requestPayment } from '../api/payments'
 import { getBooks } from '../api/books'
 import CardLimitForm from '../components/CardLimitForm'
+import { useToast } from '../context/ToastContext'
+import { getErrorMessage } from '../utils/errorMessage'
 
 export default function Checkout() {
   const navigate = useNavigate()
+  const { showError } = useToast()
 
   const [items, setItems] = useState([])
   const [cartLoading, setCartLoading] = useState(true)
@@ -31,7 +34,7 @@ export default function Checkout() {
     getMyCards()
       .then((res) => {
         setCards(res.data)
-        if (res.data.length > 0) setSelectedCardId(res.data[0].id)
+        if (res.data.length > 0) setSelectedCardId(res.data[0].cardId)
       })
       .catch(() => setCards([]))
   }, [])
@@ -41,10 +44,12 @@ export default function Checkout() {
     try {
       const res = await issueCard({ monthlyLimit })
       setCards((prev) => [...prev, res.data])
-      setSelectedCardId(res.data.id)
+      setSelectedCardId(res.data.cardId)
       setShowLimitForm(false)
     } catch {
-      setMessage('카드 발급에 실패했습니다. 잠시 후 다시 시도해주세요.')
+      const text = '카드 발급에 실패했습니다. 잠시 후 다시 시도해주세요.'
+      setMessage(text)
+      showError(text)
     } finally {
       setIssuingCard(false)
     }
@@ -63,10 +68,10 @@ export default function Checkout() {
       const availableIds = new Set(booksRes.data.content.map((b) => b.bookId))
       const staleItem = items.find((i) => !availableIds.has(i.bookId))
       if (staleItem) {
+        const text = `${staleItem.title}은(는) 판매가 종료되어 결제를 진행할 수 없습니다. 장바구니에서 확인해주세요.`
         setStatus('declined')
-        setMessage(
-          `${staleItem.title}은(는) 판매가 종료되어 결제를 진행할 수 없습니다. 장바구니에서 확인해주세요.`
-        )
+        setMessage(text)
+        showError(text)
         return
       }
 
@@ -83,8 +88,10 @@ export default function Checkout() {
       await clearCartItems(items)
       notifyCartChanged()
     } catch (err) {
+      const text = getErrorMessage(err, '결제 처리 중 오류가 발생했습니다.')
       setStatus('declined')
-      setMessage(err.response?.data?.message || '결제 처리 중 오류가 발생했습니다.')
+      setMessage(text)
+      showError(text)
     }
   }
 
@@ -158,17 +165,17 @@ export default function Checkout() {
               const remainingLimit = card.monthlyLimit - card.currentUsage
               return (
                 <label
-                  key={card.id}
+                  key={card.cardId}
                   className="flex items-center gap-3 border rounded px-4 py-2.5 cursor-pointer text-sm"
                   style={{
-                    borderColor: selectedCardId === card.id ? 'var(--color-clay)' : 'var(--color-line)',
+                    borderColor: selectedCardId === card.cardId ? 'var(--color-clay)' : 'var(--color-line)',
                   }}
                 >
                   <input
                     type="radio"
                     name="card"
-                    checked={selectedCardId === card.id}
-                    onChange={() => setSelectedCardId(card.id)}
+                    checked={selectedCardId === card.cardId}
+                    onChange={() => setSelectedCardId(card.cardId)}
                   />
                   <span>{card.maskedCardNumber}</span>
                   <span className="ml-auto" style={{ color: 'var(--color-clay)' }}>

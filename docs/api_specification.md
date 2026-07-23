@@ -1,7 +1,5 @@
 # 책 먹는 사자 - 백엔드 API 명세서
 
-본 API 명세서는 `책 먹는 사자.md` 요구사항을 기반으로 작성되었습니다.
-
 ## 개발 우선순위
 
 - **1차 구현 (핵심 기능)**: 회원 인증, 도서 조회, 장바구니, 가상 카드, 주문 트랜잭션, 결제(일반/카카오페이), 명세서 조회
@@ -48,7 +46,7 @@
 
   ```json
   {
-    "loginId": "user123",
+    "username": "user123",
     "password": "password123!",
     "name": "홍길동"
   }
@@ -71,7 +69,7 @@
 
   ```json
   {
-    "loginId": "user123",
+    "username": "user123",
     "password": "password123!"
   }
   ```
@@ -97,7 +95,7 @@
   ```json
   {
     "memberId": 1,
-    "loginId": "user123",
+    "username": "user123",
     "name": "홍길동",
     "role": "USER",
     "createdAt": "2026-07-20T10:00:00Z"
@@ -580,7 +578,7 @@
       {
         "orderId": 1001,
         "memberId": 5,
-        "loginId": "user123",
+        "username": "user123",
         "totalAmount": 60000,
         "orderStatus": "PAID",
         "createdAt": "2026-07-20T10:05:00Z"

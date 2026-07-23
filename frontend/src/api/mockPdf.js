@@ -1,12 +1,16 @@
-import { jsPDF } from 'jspdf'
-import html2canvas from 'html2canvas'
-
 // 브라우저에서 렌더링한 오프스크린 요소를 캡처해 PDF Blob URL로 만드는 공용 헬퍼.
 // (mockPayments.js의 결제 명세서, mockStatements.js의 기간별 명세서가 함께 사용한다)
 // 텍스트 대신 이미지로 캡처하는 이유: jsPDF 기본 폰트(Helvetica 등)는 한글 글리프가 없어
 // doc.text()로 직접 그리면 글자가 깨진다. html2canvas로 브라우저가 렌더링한 화면을
 // 그대로 캡처해 이미지로 삽입하면 한글도 정상적으로 나온다.
+// jspdf/html2canvas는 이 함수를 실제로 호출할 때만 필요하므로(영수증/명세서 다운로드
+// 시점) 동적 import로 초기 번들에서 분리한다.
 export const renderElementToPdfUrl = async (element) => {
+  const [{ jsPDF }, { default: html2canvas }] = await Promise.all([
+    import('jspdf'),
+    import('html2canvas'),
+  ])
+
   document.body.appendChild(element)
   try {
     // 붙인 직후에는 브라우저가 아직 레이아웃/페인트를 끝내지 않았을 수 있어 한 프레임 대기

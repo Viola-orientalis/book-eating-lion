@@ -1,3 +1,4 @@
+SET NAMES utf8mb4;
 -- DB 스키마 정의 (MySQL 기준)
 
 DROP TABLE IF EXISTS Cart_Items;
@@ -13,7 +14,7 @@ DROP TABLE IF EXISTS Members;
 -- 1. Members
 CREATE TABLE Members (
     member_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    login_id VARCHAR(50) UNIQUE NOT NULL,
+    username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     name VARCHAR(100) NOT NULL,
     role ENUM('USER', 'ADMIN') DEFAULT 'USER',

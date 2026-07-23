@@ -3,9 +3,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { getCart, updateCartItem, removeCartItem } from '../api/cart'
 import { getBooks } from '../api/books'
 import { notifyCartChanged } from '../api/cartEvents'
+import ListSkeleton from '../components/skeletons/ListSkeleton'
+import { useToast } from '../context/ToastContext'
+import { getErrorMessage } from '../utils/errorMessage'
 
 export default function Cart() {
   const navigate = useNavigate()
+  const { showError } = useToast()
   const [items, setItems] = useState([])
   const [stockMap, setStockMap] = useState({})
   const [loading, setLoading] = useState(true)
@@ -37,8 +41,13 @@ export default function Cart() {
           setRemovedNotice(`판매 종료된 도서가 장바구니에서 제거되었습니다: ${titles}`)
         }
       })
-      .catch(() => setItems([]))
+      .catch((err) => {
+        setItems([])
+        showError(getErrorMessage(err, '장바구니를 불러오지 못했습니다.'))
+      })
       .finally(() => setLoading(false))
+    // showError는 useCallback으로 고정된 참조라 최초 1회 조회에만 의존하면 된다
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const totalPrice = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
@@ -52,6 +61,8 @@ export default function Cart() {
         prev.map((i) => (i.cartItemId === item.cartItemId ? { ...i, quantity: nextQuantity } : i))
       )
       notifyCartChanged()
+    } catch (err) {
+      showError(getErrorMessage(err, '수량 변경에 실패했습니다.'))
     } finally {
       setBusyItemId(null)
     }
@@ -63,6 +74,8 @@ export default function Cart() {
       await removeCartItem(item.cartItemId)
       setItems((prev) => prev.filter((i) => i.cartItemId !== item.cartItemId))
       notifyCartChanged()
+    } catch (err) {
+      showError(getErrorMessage(err, '삭제에 실패했습니다.'))
     } finally {
       setBusyItemId(null)
     }
@@ -95,7 +108,7 @@ export default function Cart() {
   }
 
   if (loading) {
-    return <p className="text-sm">불러오는 중...</p>
+    return <ListSkeleton rows={3} />
   }
 
   return (
