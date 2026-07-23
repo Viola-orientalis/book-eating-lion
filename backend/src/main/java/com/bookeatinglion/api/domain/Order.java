@@ -9,16 +9,11 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString
-public class Member {
+public class Order {
+    private Long orderId;
     private Long memberId;
-    private String username;
-    private String password;
-    private String name;
-    private Gender gender;
-    private Integer age;
-    private Role role;
-    private boolean isDeleted;
-    private LocalDateTime deletedAt;
+    private Long totalAmount;
+    private OrderStatus orderStatus;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

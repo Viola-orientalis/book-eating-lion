@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bookeatinglion.api.mapper.CardMapper">
+
+    <select id="findByMemberId" resultType="com.bookeatinglion.api.domain.Card">
+        SELECT card_id as cardId,
+               member_id as memberId,
+               card_token as cardToken,
+               masked_card_number as maskedCardNumber,
+               card_status as cardStatus,
+               monthly_limit as monthlyLimit,
+               current_usage as currentUsage,
+               issued_date as issuedDate,
+               expiry_date as expiryDate,
+               is_deleted as isDeleted,
+               created_at as createdAt
+        FROM Cards
+        WHERE member_id = #{memberId} AND is_deleted = 0
+    </select>
+
+    <select id="findById" resultType="com.bookeatinglion.api.domain.Card">
+        SELECT card_id as cardId,
+               member_id as memberId,
+               card_token as cardToken,
+               masked_card_number as maskedCardNumber,
+               card_status as cardStatus,
+               monthly_limit as monthlyLimit,
+               current_usage as currentUsage,
+               issued_date as issuedDate,
+               expiry_date as expiryDate,
+               is_deleted as isDeleted,
+               created_at as createdAt
+        FROM Cards
+        WHERE card_id = #{cardId} AND is_deleted = 0
+    </select>
+
+    <insert id="insertCard" useGeneratedKeys="true" keyProperty="cardId">
+        INSERT INTO Cards (member_id, card_token, masked_card_number, card_status, monthly_limit, current_usage, issued_date, expiry_date)
+        VALUES (#{memberId}, #{cardToken}, #{maskedCardNumber}, #{cardStatus}, #{monthlyLimit}, #{currentUsage}, #{issuedDate}, #{expiryDate})
+    </insert>
+
+    <update id="updateUsage">
+        UPDATE Cards
+        SET current_usage = #{usage}
+        WHERE card_id = #{cardId}
+    </update>
+
+    <update id="updateUsageWithLimit">
+        UPDATE Cards
+        SET current_usage = current_usage + #{amount}
+        WHERE card_id = #{cardId}
+          AND card_status = 'ACTIVE'
+          AND is_deleted = 0
+          AND current_usage + #{amount} &lt;= monthly_limit
+    </update>
+
+    <update id="restoreUsage">
+        UPDATE Cards
+        SET current_usage = CASE WHEN current_usage - #{amount} &lt; 0 THEN 0 ELSE current_usage - #{amount} END
+        WHERE card_id = #{cardId}
+    </update>
+
+</mapper>

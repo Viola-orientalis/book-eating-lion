@@ -2,7 +2,7 @@ SET NAMES utf8mb4;
 -- DB 스키마 정의 (MySQL 기준)
 
 DROP TABLE IF EXISTS Cart_Items;
-DROP TABLE IF EXISTS Statements;
+-- DROP TABLE IF EXISTS Statements;
 DROP TABLE IF EXISTS Payments;
 DROP TABLE IF EXISTS Order_Items;
 DROP TABLE IF EXISTS Orders;
@@ -17,6 +17,8 @@ CREATE TABLE Members (
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     name VARCHAR(100) NOT NULL,
+    gender ENUM('MALE', 'FEMALE') DEFAULT 'MALE',
+    age INT DEFAULT NULL,
     role ENUM('USER', 'ADMIN') DEFAULT 'USER',
     is_deleted TINYINT(1) DEFAULT 0,
     deleted_at TIMESTAMP NULL,
@@ -114,22 +116,22 @@ CREATE TABLE Payments (
     INDEX idx_card_approved (card_id, approved_at)
 );
 
--- 8. Statements
-CREATE TABLE Statements (
-    statement_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    member_id BIGINT NOT NULL,
-    card_id BIGINT NULL,
-    period_start DATE NOT NULL,
-    payment_method ENUM('CARD', 'KAKAOPAY', 'ALL') DEFAULT 'ALL',
-    period_end DATE NOT NULL,
-    total_amount BIGINT NOT NULL,
-    s3_object_key VARCHAR(500) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (member_id) REFERENCES Members(member_id) ON DELETE CASCADE,
-    FOREIGN KEY (card_id) REFERENCES Cards(card_id) ON DELETE SET NULL,
-    INDEX idx_member_card (member_id, card_id),
-    INDEX idx_period (period_start, period_end)
-);
+-- 8. Statements (프론트엔드 동적 생성 방식으로 전환되어 백엔드/DB 연동 미사용 - 참고용 주석 보존)
+-- CREATE TABLE Statements (
+--     statement_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+--     member_id BIGINT NOT NULL,
+--     card_id BIGINT NULL,
+--     period_start DATE NOT NULL,
+--     payment_method ENUM('CARD', 'KAKAOPAY', 'ALL') DEFAULT 'ALL',
+--     period_end DATE NOT NULL,
+--     total_amount BIGINT NOT NULL,
+--     s3_object_key VARCHAR(500) NOT NULL,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     FOREIGN KEY (member_id) REFERENCES Members(member_id) ON DELETE CASCADE,
+--     FOREIGN KEY (card_id) REFERENCES Cards(card_id) ON DELETE SET NULL,
+--     INDEX idx_member_card (member_id, card_id),
+--     INDEX idx_period (period_start, period_end)
+-- );
 
 -- 9. Cart_Items
 CREATE TABLE Cart_Items (

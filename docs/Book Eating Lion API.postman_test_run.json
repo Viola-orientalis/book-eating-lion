@@ -1,40 +1,22 @@
 {
-	"id": "f3d677bc-2f11-4e07-9b7a-93665802a49a",
+	"id": "3e0ce663-5521-485b-b92b-3dcd859909de",
 	"name": "Book Eating Lion API",
-	"timestamp": "2026-07-21T06:21:15.655Z",
-	"collection_id": "56779466-72a095af-fc3d-4348-a9a5-125d97f74207",
+	"timestamp": "2026-07-22T04:37:02.966Z",
+	"collection_id": "56779466-cefb4370-1dd6-41d5-8dc9-86ac87eb79ec",
 	"folder_id": 0,
 	"environment_id": "0",
 	"totalPass": 0,
 	"delay": 0,
 	"persist": true,
 	"status": "finished",
-	"startedAt": "2026-07-21T06:21:12.587Z",
+	"startedAt": "2026-07-22T04:36:59.696Z",
 	"totalFail": 0,
 	"results": [
 		{
-			"id": "ca03d7b6-539b-43bb-8b4f-07a20950c4e1",
-			"name": "1-1. 회원가입 (POST /api/auth/signup)",
-			"url": "http://localhost:8080/api/auth/signup",
-			"time": 901,
-			"responseCode": {
-				"code": 201,
-				"name": "Created"
-			},
-			"tests": {},
-			"testPassFailCounts": {},
-			"times": [
-				901
-			],
-			"allTests": [
-				{}
-			]
-		},
-		{
-			"id": "56f55aea-0752-4210-b3a6-c4fdbac670a0",
-			"name": "1-2. 도서 목록 조회 (GET /api/books)",
+			"id": "94b02dcd-dae4-408f-a345-fde2e7782845",
+			"name": "1-1. 도서 목록 조회 (GET /api/books)",
 			"url": "http://localhost:8080/api/books?page=0&size=10",
-			"time": 100,
+			"time": 18,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -42,17 +24,17 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				100
+				18
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "e5d298cf-23ae-4eca-9f33-9631e47fce05",
-			"name": "1-3. 도서 키워드 검색 (?keyword=사자)",
+			"id": "48706a77-be1a-42c7-be40-52ba11e99a53",
+			"name": "1-2. 도서 키워드 검색 (?keyword=사자)",
 			"url": "http://localhost:8080/api/books?keyword=%EC%82%AC%EC%9E%90&page=0&size=10",
-			"time": 13,
+			"time": 11,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -60,17 +42,17 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				13
+				11
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "6fea6da0-9824-4140-add9-008cd0b9800e",
-			"name": "1-4. 도서 상세 조회 (GET /api/books/1)",
+			"id": "284b0932-7903-4dee-9593-4aa489ca6be5",
+			"name": "1-3. 도서 상세 조회 (GET /api/books/1)",
 			"url": "http://localhost:8080/api/books/1",
-			"time": 14,
+			"time": 9,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -78,17 +60,17 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				14
+				9
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "dfba766c-9f66-408d-ae82-6fac270f3bb0",
-			"name": "1-5. 헬스체크 (GET /health)",
+			"id": "af42610c-9261-4ab3-bd63-e204e4aa7bc1",
+			"name": "1-4. 헬스체크 (GET /health)",
 			"url": "http://localhost:8080/health",
-			"time": 6,
+			"time": 4,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -96,17 +78,17 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				6
+				4
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "28658e7d-1ebe-4c8c-851d-4819c422b5de",
-			"name": "[검증] 미로그인 상태에서 내정보 접근 → 401 차단",
+			"id": "67059859-da30-41e4-ab00-226eaae90ca7",
+			"name": "[검증] 미로그인 내정보 접근 → 401 차단",
 			"url": "http://localhost:8080/api/auth/me",
-			"time": 6,
+			"time": 4,
 			"responseCode": {
 				"code": 401,
 				"name": "Unauthorized"
@@ -114,15 +96,15 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				6
+				4
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "f73d07c6-4ea5-4a13-a1d7-f1902cc5ec38",
-			"name": "[검증] 미로그인 상태에서 장바구니 접근 → 401 차단",
+			"id": "5633a2ad-17bd-4b49-a375-fb2a4433af6e",
+			"name": "[검증] 미로그인 장바구니 접근 → 401 차단",
 			"url": "http://localhost:8080/api/cart",
 			"time": 5,
 			"responseCode": {
@@ -139,10 +121,28 @@
 			]
 		},
 		{
-			"id": "92250114-731e-4f95-93b7-c915715ff75a",
-			"name": "2-1. 로그인 실행 (POST /api/auth/login) ★ JWT 저장",
+			"id": "7e1392e8-c7d7-4413-ae31-5720e53a3e43",
+			"name": "2-1. 회원가입 (POST /api/auth/signup)",
+			"url": "http://localhost:8080/api/auth/signup",
+			"time": 10,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				10
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "07594488-8055-4e89-a73d-a2ea0ded3690",
+			"name": "2-2. 로그인 실행 (POST /api/auth/login) ★ JWT 저장",
 			"url": "http://localhost:8080/api/auth/login",
-			"time": 189,
+			"time": 85,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -150,17 +150,17 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				189
+				85
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "4b48de1d-0763-4a71-b6b2-6410d9071c9e",
-			"name": "2-2. 내 정보 조회 (GET /api/auth/me)",
+			"id": "2d6913b4-677f-461a-bcf6-9d005f7c9aab",
+			"name": "2-3. 내 정보 조회 (GET /api/auth/me)",
 			"url": "http://localhost:8080/api/auth/me",
-			"time": 78,
+			"time": 10,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -168,17 +168,17 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				78
+				10
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "122cd441-d001-428e-94c8-09f00bd9114c",
-			"name": "2-3. 장바구니 담기 (POST /api/cart) ★ cartItemId 저장",
-			"url": "http://localhost:8080/api/cart",
-			"time": 51,
+			"id": "32025b8a-2385-444b-bfc8-3302ace071d8",
+			"name": "3-1. 가상 카드 발급 (POST /api/cards) ★ cardId 저장",
+			"url": "http://localhost:8080/api/cards",
+			"time": 19,
 			"responseCode": {
 				"code": 201,
 				"name": "Created"
@@ -186,35 +186,53 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				51
+				19
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "3d1c1b20-1970-4c82-b42a-f028ab36b8ae",
-			"name": "2-4. 장바구니 조회 (GET /api/cart)",
+			"id": "bf910d82-0773-4078-9125-3ca01c164162",
+			"name": "3-2. 내 가상 카드 목록 조회 (GET /api/cards)",
+			"url": "http://localhost:8080/api/cards",
+			"time": 12,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				12
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "3620a097-5e85-4e09-9c0c-6b45bc6ea605",
+			"name": "4-1. 장바구니 담기 (POST /api/cart) ★ cartItemId 저장",
 			"url": "http://localhost:8080/api/cart",
-			"time": 25,
+			"time": 20,
 			"responseCode": {
-				"code": 200,
-				"name": "OK"
+				"code": 201,
+				"name": "Created"
 			},
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				25
+				20
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "8041024f-d042-467a-92d1-64b1002feae4",
-			"name": "2-5. 수량 변경 (PUT /api/cart/{{cartItemId}})",
-			"url": "http://localhost:8080/api/cart/1",
-			"time": 26,
+			"id": "1c916d9c-90d0-4eb5-8db0-cc77d43df83d",
+			"name": "4-2. 장바구니 조회 (GET /api/cart)",
+			"url": "http://localhost:8080/api/cart",
+			"time": 11,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -222,17 +240,17 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				26
+				11
 			],
 			"allTests": [
 				{}
 			]
 		},
 		{
-			"id": "270ffdf5-52a7-46a8-a6c0-ac5aae978cde",
-			"name": "2-6. 장바구니 삭제 (DELETE /api/cart/{{cartItemId}})",
-			"url": "http://localhost:8080/api/cart/1",
-			"time": 28,
+			"id": "1261f71e-606f-4029-b327-a2d1c37fc976",
+			"name": "4-3. 장바구니 수량 변경 (PUT /api/cart/{{cartItemId}})",
+			"url": "http://localhost:8080/api/cart/4",
+			"time": 20,
 			"responseCode": {
 				"code": 200,
 				"name": "OK"
@@ -240,7 +258,223 @@
 			"tests": {},
 			"testPassFailCounts": {},
 			"times": [
-				28
+				20
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "73bc6ef1-c7e4-41f7-b6e7-43cab37250c0",
+			"name": "5-1. 주문 생성 정상 (POST /api/orders) ★ orderId 저장",
+			"url": "http://localhost:8080/api/orders",
+			"time": 24,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				24
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "e0b81587-5fb6-4020-bef2-b00f35824022",
+			"name": "5-2. 내 주문 내역 조회 (GET /api/orders)",
+			"url": "http://localhost:8080/api/orders",
+			"time": 13,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				13
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "92c25fe3-b44e-4ec2-bbbe-ecaa7b8bb8cc",
+			"name": "6-1. 일반 카드 결제 승인 (POST /api/payments/card) ★ paymentId 저장",
+			"url": "http://localhost:8080/api/payments/card",
+			"time": 27,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				27
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "2c10b64e-591b-4e64-8449-7c2f72231068",
+			"name": "6-2. 내 결제 내역 조회 (GET /api/payments)",
+			"url": "http://localhost:8080/api/payments",
+			"time": 10,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				10
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "15a525d3-2359-4151-ba5b-adbca805a6d1",
+			"name": "6-3. 카드 결제 취소 요청 (POST /api/payments/{{paymentId}}/cancel)",
+			"url": "http://localhost:8080/api/payments/5/cancel",
+			"time": 23,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				23
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "8e9ea642-be3f-483e-a809-4bf8ee8f9270",
+			"name": "[수동 7-0] 카카오페이 전용 주문 생성 (POST /api/orders) ★ orderId 신규 저장",
+			"url": "http://localhost:8080/api/orders",
+			"time": 27,
+			"responseCode": {
+				"code": 201,
+				"name": "Created"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				27
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "da5786e7-52a2-401d-a6c8-a5adccf24fd8",
+			"name": "[수동] 카카오페이 결제 준비 (POST /api/payments/kakaopay/ready) ★ tid 저장",
+			"url": "http://localhost:8080/api/payments/kakaopay/ready",
+			"time": 211,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				211
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "8678db3d-dd13-4f75-9cae-43c866610e5f",
+			"name": "[수동] 카카오페이 결제 승인 (POST /api/payments/kakaopay/approve)",
+			"url": "http://localhost:8080/api/payments/kakaopay/approve",
+			"time": 68,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				68
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "2e3b3175-52a2-41b3-8fe9-9e535cf6a6ed",
+			"name": "[예외] 빈 주문 상품 요청 (orderItems: []) → 400 에러",
+			"url": "http://localhost:8080/api/orders",
+			"time": 17,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				17
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "52377496-7cb4-44da-82b4-3423b0c98edf",
+			"name": "[예외] 존재하지 않는 도서 주문 (bookId: 99999) → 400 에러",
+			"url": "http://localhost:8080/api/orders",
+			"time": 12,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				12
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "e9718807-f362-41af-b373-3d6b10e9881a",
+			"name": "[예외] 재고 부족/초과 주문 (quantity: 99999) → 400 에러",
+			"url": "http://localhost:8080/api/orders",
+			"time": 19,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				19
+			],
+			"allTests": [
+				{}
+			]
+		},
+		{
+			"id": "0f556736-2e71-45b8-aee2-0c8a07d195b2",
+			"name": "[예외] 존재하지 않는 카드 결제 (cardId: 99999) → 400 에러",
+			"url": "http://localhost:8080/api/payments/card",
+			"time": 14,
+			"responseCode": {
+				"code": 400,
+				"name": "Bad Request"
+			},
+			"tests": {},
+			"testPassFailCounts": {},
+			"times": [
+				14
 			],
 			"allTests": [
 				{}
@@ -248,60 +482,112 @@
 		}
 	],
 	"count": 1,
-	"totalTime": 1442,
+	"totalTime": 703,
 	"collection": {
 		"requests": [
 			{
-				"id": "ca03d7b6-539b-43bb-8b4f-07a20950c4e1",
+				"id": "94b02dcd-dae4-408f-a345-fde2e7782845",
+				"method": "GET"
+			},
+			{
+				"id": "48706a77-be1a-42c7-be40-52ba11e99a53",
+				"method": "GET"
+			},
+			{
+				"id": "284b0932-7903-4dee-9593-4aa489ca6be5",
+				"method": "GET"
+			},
+			{
+				"id": "af42610c-9261-4ab3-bd63-e204e4aa7bc1",
+				"method": "GET"
+			},
+			{
+				"id": "67059859-da30-41e4-ab00-226eaae90ca7",
+				"method": "GET"
+			},
+			{
+				"id": "5633a2ad-17bd-4b49-a375-fb2a4433af6e",
+				"method": "GET"
+			},
+			{
+				"id": "7e1392e8-c7d7-4413-ae31-5720e53a3e43",
 				"method": "POST"
 			},
 			{
-				"id": "56f55aea-0752-4210-b3a6-c4fdbac670a0",
-				"method": "GET"
-			},
-			{
-				"id": "e5d298cf-23ae-4eca-9f33-9631e47fce05",
-				"method": "GET"
-			},
-			{
-				"id": "6fea6da0-9824-4140-add9-008cd0b9800e",
-				"method": "GET"
-			},
-			{
-				"id": "dfba766c-9f66-408d-ae82-6fac270f3bb0",
-				"method": "GET"
-			},
-			{
-				"id": "28658e7d-1ebe-4c8c-851d-4819c422b5de",
-				"method": "GET"
-			},
-			{
-				"id": "f73d07c6-4ea5-4a13-a1d7-f1902cc5ec38",
-				"method": "GET"
-			},
-			{
-				"id": "92250114-731e-4f95-93b7-c915715ff75a",
+				"id": "07594488-8055-4e89-a73d-a2ea0ded3690",
 				"method": "POST"
 			},
 			{
-				"id": "4b48de1d-0763-4a71-b6b2-6410d9071c9e",
+				"id": "2d6913b4-677f-461a-bcf6-9d005f7c9aab",
 				"method": "GET"
 			},
 			{
-				"id": "122cd441-d001-428e-94c8-09f00bd9114c",
+				"id": "32025b8a-2385-444b-bfc8-3302ace071d8",
 				"method": "POST"
 			},
 			{
-				"id": "3d1c1b20-1970-4c82-b42a-f028ab36b8ae",
+				"id": "bf910d82-0773-4078-9125-3ca01c164162",
 				"method": "GET"
 			},
 			{
-				"id": "8041024f-d042-467a-92d1-64b1002feae4",
+				"id": "3620a097-5e85-4e09-9c0c-6b45bc6ea605",
+				"method": "POST"
+			},
+			{
+				"id": "1c916d9c-90d0-4eb5-8db0-cc77d43df83d",
+				"method": "GET"
+			},
+			{
+				"id": "1261f71e-606f-4029-b327-a2d1c37fc976",
 				"method": "PUT"
 			},
 			{
-				"id": "270ffdf5-52a7-46a8-a6c0-ac5aae978cde",
-				"method": "DELETE"
+				"id": "73bc6ef1-c7e4-41f7-b6e7-43cab37250c0",
+				"method": "POST"
+			},
+			{
+				"id": "e0b81587-5fb6-4020-bef2-b00f35824022",
+				"method": "GET"
+			},
+			{
+				"id": "92c25fe3-b44e-4ec2-bbbe-ecaa7b8bb8cc",
+				"method": "POST"
+			},
+			{
+				"id": "2c10b64e-591b-4e64-8449-7c2f72231068",
+				"method": "GET"
+			},
+			{
+				"id": "15a525d3-2359-4151-ba5b-adbca805a6d1",
+				"method": "POST"
+			},
+			{
+				"id": "8e9ea642-be3f-483e-a809-4bf8ee8f9270",
+				"method": "POST"
+			},
+			{
+				"id": "da5786e7-52a2-401d-a6c8-a5adccf24fd8",
+				"method": "POST"
+			},
+			{
+				"id": "8678db3d-dd13-4f75-9cae-43c866610e5f",
+				"method": "POST"
+			},
+			{
+				"id": "2e3b3175-52a2-41b3-8fe9-9e535cf6a6ed",
+				"method": "POST"
+			},
+			{
+				"id": "52377496-7cb4-44da-82b4-3423b0c98edf",
+				"method": "POST"
+			},
+			{
+				"id": "e9718807-f362-41af-b373-3d6b10e9881a",
+				"method": "POST"
+			},
+			{
+				"id": "0f556736-2e71-45b8-aee2-0c8a07d195b2",
+				"method": "POST"
 			}
 		]
 	}

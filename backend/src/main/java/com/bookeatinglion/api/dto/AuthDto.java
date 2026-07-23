@@ -1,5 +1,6 @@
 package com.bookeatinglion.api.dto;
 
+import com.bookeatinglion.api.domain.Gender;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +22,8 @@ public class AuthDto {
         private String username;
         private String password;
         private String name;
+        private Gender gender;
+        private Integer age;
     }
 
     @Getter
@@ -40,6 +43,8 @@ public class AuthDto {
         private Long memberId;
         private String username;
         private String name;
+        private Gender gender;
+        private Integer age;
         private String role;
         private LocalDateTime createdAt;
     }
