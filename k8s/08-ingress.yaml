@@ -9,7 +9,7 @@ metadata:
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/subnets: "subnet-0ced85efc560711fa, subnet-0da70b1209f0ce491"
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
-    alb.ingress.kubernetes.io/certificate-arn:  # ACM 인증서 ARN
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-northeast-2:061039804626:certificate/6000fb1e-05bd-4cc0-b265-5a621d6b2364 # ACM 인증서 ARN
     alb.ingress.kubernetes.io/ssl-redirect: '443'
 spec:
   rules:
