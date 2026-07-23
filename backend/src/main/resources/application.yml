@@ -6,12 +6,12 @@ spring:
     name: book-eating-lion-api
   datasource:
     primary:
-      jdbc-url: jdbc:mysql://${DB_PRIMARY_HOST:${DB_HOST:localhost}}:3306/book_eating_lion?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+      jdbc-url: jdbc:mysql://${DB_PRIMARY_HOST:${DB_HOST:localhost}}:3306/${DB_NAME:bookeatinglion}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
       username: ${DB_USERNAME:root}
       password: ${DB_PASSWORD:root}
       driver-class-name: com.mysql.cj.jdbc.Driver
     replica:
-      jdbc-url: jdbc:mysql://${DB_REPLICA_HOST:${DB_HOST:localhost}}:3306/book_eating_lion?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+      jdbc-url: jdbc:mysql://${DB_REPLICA_HOST:${DB_HOST:localhost}}:3306/${DB_NAME:bookeatinglion}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
       username: ${DB_USERNAME:root}
       password: ${DB_PASSWORD:root}
       driver-class-name: com.mysql.cj.jdbc.Driver
@@ -29,3 +29,9 @@ kakaopay:
   secret-key: ${KAKAOPAY_SECRET_KEY:DEVAC1371A30AFB5D8FCFD9A8C0C18B2CC847AC5}
   cid: TC0ONETIME
   api-url: https://open-api.kakaopay.com
+
+aws:
+  s3:
+    bucket: ${AWS_S3_BUCKET:team3-bookeatinglion-storage-s3}
+    region: ${AWS_REGION:ap-northeast-2}
+

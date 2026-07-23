@@ -39,6 +39,16 @@
       "key": "kakaoTid",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "adminBookId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "adminAccessToken",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -265,7 +275,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"testuser_runner\",\n  \"password\": \"1234\"\n}"
+              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"1234\"\n}"
             }
           }
         },
@@ -988,6 +998,323 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"orderId\": {{orderId}},\n  \"cardId\": 99999,\n  \"idempotencyKey\": \"idem-key-fail-001\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "08. Admin - 상품 관리 (AWS S3 Upload)",
+      "item": [
+        {
+          "name": "8-0. 관리자 로그인 (POST /api/auth/login) ★ adminAccessToken 자동 저장",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.accessToken) {",
+                  "  pm.collectionVariables.set('adminAccessToken', json.accessToken);",
+                  "  console.log('Saved adminAccessToken:', json.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"1234\"\n}"
+            }
+          }
+        },
+        {
+          "name": "8-1. 관리자 상품 등록 (POST /api/admin/books - multipart)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.book && jsonData.book.bookId) {",
+                  "        pm.environment.set('adminBookId', jsonData.book.bookId);",
+                  "        pm.collectionVariables.set('adminBookId', jsonData.book.bookId);",
+                  "        console.log('Saved adminBookId:', jsonData.book.bookId);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "book",
+                  "value": "{\n  \"title\": \"스프링 부트 & AWS 실전 개발\",\n  \"author\": \"김사자\",\n  \"publisher\": \"사자출판사\",\n  \"isbn\": \"9788912345678\",\n  \"price\": 28000,\n  \"stock\": 50,\n  \"category\": \"IT\",\n  \"description\": \"Spring Boot, AWS EKS, S3 기반 풀스택 실습 도서\",\n  \"saleStatus\": \"ON_SALE\"\n}",
+                  "contentType": "application/json",
+                  "type": "text"
+                },
+                {
+                  "key": "imageFile",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/books",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "books"
+              ]
+            }
+          }
+        },
+        {
+          "name": "8-2. 관리자 상품 정보 수정 (PUT /api/admin/books/{bookId})",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "book",
+                  "value": "{\n  \"title\": \"스프링 부트 & AWS 실전 개발 (개정 2판)\",\n  \"author\": \"김사자\",\n  \"publisher\": \"사자출판사\",\n  \"isbn\": \"9788912345678\",\n  \"price\": 32000,\n  \"stock\": 100,\n  \"category\": \"IT\",\n  \"description\": \"개정판 설명\",\n  \"saleStatus\": \"ON_SALE\"\n}",
+                  "contentType": "application/json",
+                  "type": "text"
+                },
+                {
+                  "key": "imageFile",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/books/{{adminBookId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "books",
+                "{{adminBookId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "8-3. 상품 판매 상태 변경 (PATCH /api/admin/books/{bookId}/status)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"saleStatus\": \"STOPPED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/books/{{adminBookId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "books",
+                "{{adminBookId}}",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "8-4. 상품 삭제 (DELETE /api/admin/books/{bookId})",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/books/{{adminBookId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "books",
+                "{{adminBookId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. Admin - 통계 및 대시보드",
+      "item": [
+        {
+          "name": "9-1. 대시보드 요약 통계 (GET /api/admin/stats/summary)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/stats/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "stats",
+                "summary"
+              ]
+            }
+          }
+        },
+        {
+          "name": "9-2. 연령대/성별 선호 도서 통계 (GET /api/admin/stats/demographic-preferences)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/stats/demographic-preferences",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "stats",
+                "demographic-preferences"
+              ]
+            }
+          }
+        },
+        {
+          "name": "9-3. 최근 7일 매출 추이 (GET /api/admin/stats/sales-trend)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/stats/sales-trend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "stats",
+                "sales-trend"
+              ]
             }
           }
         }

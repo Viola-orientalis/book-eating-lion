@@ -20,4 +20,12 @@ public interface BookMapper {
     int decreaseStock(@Param("bookId") Long bookId, @Param("quantity") int quantity);
     
     int increaseStock(@Param("bookId") Long bookId, @Param("quantity") int quantity);
+
+    int insertBook(Book book);
+
+    int updateBook(Book book);
+
+    int updateSaleStatus(@Param("bookId") Long bookId, @Param("saleStatus") String saleStatus);
+
+    int deleteBook(@Param("bookId") Long bookId);
 }
