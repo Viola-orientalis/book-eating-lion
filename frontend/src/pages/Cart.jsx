@@ -17,6 +17,7 @@ export default function Cart() {
   const [checking, setChecking] = useState(false)
   const [busyItemId, setBusyItemId] = useState(null)
   const [removedNotice, setRemovedNotice] = useState('')
+  const [imageLoadFailedIds, setImageLoadFailedIds] = useState(() => new Set())
 
   useEffect(() => {
     Promise.all([getCart(), getBooks({ size: 1000 })])
@@ -140,7 +141,7 @@ export default function Cart() {
             장바구니
           </h1>
 
-          <div className="flex flex-col gap-3">
+          <div>
             {items.map((item) => {
               const stock = stockMap[item.bookId]
               const overStock = stock !== undefined && item.quantity > stock
@@ -148,12 +149,31 @@ export default function Cart() {
               return (
                 <div
                   key={item.cartItemId}
-                  className="flex items-center justify-between border rounded px-4 py-3"
-                  style={{ borderColor: 'var(--color-line)', background: 'var(--color-paper-soft)' }}
+                  className="flex items-center gap-4 rounded-xl border border-[var(--color-line)] shadow-sm hover:shadow-md transition-shadow px-4 py-4 mb-3"
+                  style={{ background: 'var(--color-paper-soft)' }}
                 >
-                  <div>
-                    <p className="font-medium" style={{ color: 'var(--color-ink)' }}>{item.title}</p>
-                    <p className="text-sm" style={{ color: 'var(--color-clay)' }}>
+                  <div
+                    className="w-20 h-24 flex-shrink-0 rounded-lg overflow-hidden flex items-center justify-center"
+                    style={{ background: 'var(--color-line)' }}
+                  >
+                    {item.imageUrl && !imageLoadFailedIds.has(item.cartItemId) ? (
+                      <img
+                        src={item.imageUrl}
+                        alt={item.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover"
+                        onError={() =>
+                          setImageLoadFailedIds((prev) => new Set(prev).add(item.cartItemId))
+                        }
+                      />
+                    ) : (
+                      <span className="text-3xl">📖</span>
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate" style={{ color: 'var(--color-ink)' }}>{item.title}</p>
+                    <p className="text-sm mt-1" style={{ color: 'var(--color-clay)' }}>
                       {item.price.toLocaleString()}원
                     </p>
                     {stock !== undefined && (
@@ -167,22 +187,24 @@ export default function Cart() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col items-end gap-2">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleQuantityChange(item, item.quantity - 1)}
                         disabled={busy || item.quantity <= 1}
-                        className="w-7 h-7 rounded border text-sm disabled:opacity-50"
-                        style={{ borderColor: 'var(--color-line)' }}
+                        className="w-8 h-8 rounded-lg border flex items-center justify-center text-sm font-medium transition-colors hover:bg-[var(--color-line)]/40 active:bg-[var(--color-line)]/70 disabled:opacity-50 disabled:hover:bg-transparent"
+                        style={{ borderColor: 'var(--color-line)', color: 'var(--color-ink)' }}
                       >
                         −
                       </button>
-                      <span className="text-sm w-6 text-center">{item.quantity}</span>
+                      <span className="text-sm w-6 text-center" style={{ color: 'var(--color-ink)' }}>
+                        {item.quantity}
+                      </span>
                       <button
                         onClick={() => handleQuantityChange(item, item.quantity + 1)}
                         disabled={busy}
-                        className="w-7 h-7 rounded border text-sm disabled:opacity-50"
-                        style={{ borderColor: 'var(--color-line)' }}
+                        className="w-8 h-8 rounded-lg border flex items-center justify-center text-sm font-medium transition-colors hover:bg-[var(--color-line)]/40 active:bg-[var(--color-line)]/70 disabled:opacity-50 disabled:hover:bg-transparent"
+                        style={{ borderColor: 'var(--color-line)', color: 'var(--color-ink)' }}
                       >
                         +
                       </button>
@@ -190,8 +212,7 @@ export default function Cart() {
                     <button
                       onClick={() => handleRemove(item)}
                       disabled={busy}
-                      className="text-sm underline disabled:opacity-50"
-                      style={{ color: 'var(--color-danger)' }}
+                      className="text-sm underline transition-colors disabled:opacity-50 text-[var(--color-danger)] hover:text-red-500"
                     >
                       {busy ? '처리 중...' : '삭제'}
                     </button>
@@ -201,27 +222,32 @@ export default function Cart() {
             })}
           </div>
 
-          <div className="flex items-center justify-between mt-8 border-t pt-4" style={{ borderColor: 'var(--color-line)' }}>
-            <span className="font-medium">총 결제 금액</span>
-            <span className="text-xl font-bold" style={{ color: 'var(--color-gold)' }}>
-              {totalPrice.toLocaleString()}원
-            </span>
-          </div>
-
-          {orderError && (
-            <p className="text-sm mt-4" style={{ color: 'var(--color-danger)' }}>
-              {orderError}
-            </p>
-          )}
-
-          <button
-            onClick={handleCheckout}
-            disabled={checking}
-            className="w-full mt-6 py-3 rounded text-white font-medium disabled:opacity-50"
-            style={{ background: 'var(--color-ink)' }}
+          <div
+            className="mt-8 rounded-xl border border-[var(--color-line)] shadow-sm p-5"
+            style={{ background: 'var(--color-paper-soft)' }}
           >
-            {checking ? '확인 중...' : '주문하기'}
-          </button>
+            <div className="flex items-center justify-between">
+              <span className="font-medium" style={{ color: 'var(--color-ink)' }}>총 결제 금액</span>
+              <span className="text-xl font-bold" style={{ color: 'var(--color-gold)' }}>
+                {totalPrice.toLocaleString()}원
+              </span>
+            </div>
+
+            {orderError && (
+              <p className="text-sm mt-4" style={{ color: 'var(--color-danger)' }}>
+                {orderError}
+              </p>
+            )}
+
+            <button
+              onClick={handleCheckout}
+              disabled={checking}
+              className="w-full mt-4 py-3 rounded-lg text-white font-medium disabled:opacity-50"
+              style={{ background: 'var(--color-ink)' }}
+            >
+              {checking ? '확인 중...' : '주문하기'}
+            </button>
+          </div>
         </>
       )}
     </div>
