@@ -7,3 +7,12 @@ export const STATUS_LABELS = {
 }
 
 export const getStatusLabel = (status) => STATUS_LABELS[status] ?? status
+
+// 상태 배지 색상 — 결제내역/관리자 주문 조회에서 공통으로 사용
+export const STATUS_BADGE_COLOR = {
+  APPROVED: 'var(--color-forest)',
+  PAID: 'var(--color-forest)',
+  CANCELLED: 'var(--color-ink)',
+  PAYMENT_FAILED: 'var(--color-danger)',
+  PENDING_PAYMENT: 'var(--color-gold)',
+}

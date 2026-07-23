@@ -150,9 +150,24 @@ const buildReceiptElement = (payment, order, buyerName, card) => {
   return el
 }
 
+// 화면에 이미 로드된 결제 목록(getMyPayments 응답, toPaymentResponse와 동일한 평탄화 형태)을
+// 내부에서 쓰는 raw 저장 형태({ id, ... })에 맞춰 변환한다.
+const normalizeFallbackPayment = (payment) => ({
+  id: payment.paymentId,
+  orderId: payment.orderId,
+  cardId: payment.cardId,
+  amount: payment.amount,
+  merchantName: payment.merchantName,
+  status: payment.status,
+  createdAt: payment.createdAt,
+})
+
 // 결제 건당 즉석 영수증 다운로드 (데모/미리보기 목적의 임시 구현)
-export const mockGetPaymentReceipt = async (paymentId) => {
-  const payment = readMockList(PAYMENTS_KEY).find((p) => p.id === Number(paymentId))
+// 실제 백엔드에서 조회한 결제는 로컬 mock 저장소(PAYMENTS_KEY)에 없으므로, 거기서 못 찾으면
+// 화면에 이미 로드되어 있던 결제 데이터(fallbackPayment)로 대체해 PDF를 생성한다.
+export const mockGetPaymentReceipt = async (paymentId, fallbackPayment) => {
+  const stored = readMockList(PAYMENTS_KEY).find((p) => p.id === Number(paymentId))
+  const payment = stored ?? (fallbackPayment && normalizeFallbackPayment(fallbackPayment))
   if (!payment) throw mockApiError('결제 내역을 찾을 수 없습니다.', 'PAYMENT_NOT_FOUND')
 
   const order = getMockOrderById(payment.orderId)
