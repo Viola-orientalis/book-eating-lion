@@ -6,6 +6,7 @@
 
 # IDE & OS
 .idea/
+.vscode/
 *.iml
 .vscode/*
 !.vscode/settings.json
