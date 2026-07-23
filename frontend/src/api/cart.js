@@ -3,41 +3,29 @@ import { mockGetCart, mockAddCartItem, mockUpdateCartItem, mockRemoveCartItem } 
 
 // 내 장바구니 조회 (로그인 필요). 응답은 배열 그대로 내려온다.
 export const getCart = async () => {
-  try {
-    return await apiClient.get('/api/cart')
-  } catch {
-    // 백엔드 미연결 시 목 장바구니로 대체
-    return mockGetCart()
+  const res = await apiClient.get('/api/cart')
+  if (Array.isArray(res.data)) {
+    res.data = res.data.map((item) => ({
+      ...item,
+      id: item.id || item.cartItemId,
+    }))
   }
+  return res
 }
 
 // 담기
 export const addCartItem = async (payload) => {
-  try {
-    return await apiClient.post('/api/cart', payload)
-  } catch {
-    return mockAddCartItem(payload)
-  }
+  return await apiClient.post('/api/cart', payload)
 }
-// payload 예시: { bookId, quantity }
 
 // 수량 변경
 export const updateCartItem = async (cartItemId, payload) => {
-  try {
-    return await apiClient.put(`/api/cart/${cartItemId}`, payload)
-  } catch {
-    return mockUpdateCartItem(cartItemId, payload)
-  }
+  return await apiClient.put(`/api/cart/${cartItemId}`, payload)
 }
-// payload 예시: { quantity }
 
 // 삭제
 export const removeCartItem = async (cartItemId) => {
-  try {
-    return await apiClient.delete(`/api/cart/${cartItemId}`)
-  } catch {
-    return mockRemoveCartItem(cartItemId)
-  }
+  return await apiClient.delete(`/api/cart/${cartItemId}`)
 }
 
 // 결제 완료 후 장바구니를 비우기 위한 헬퍼. 별도 "전체 삭제" 엔드포인트가 없어
