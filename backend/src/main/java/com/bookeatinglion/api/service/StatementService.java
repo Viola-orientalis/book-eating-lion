@@ -6,5 +6,4 @@ import java.util.List;
 
 public interface StatementService {
     List<StatementDto.Response> getStatements(Long memberId, String startDate, String endDate);
-    StatementDto.DownloadResponse downloadStatement(Long memberId, String statementId);
 }

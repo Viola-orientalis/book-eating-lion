@@ -17,11 +17,4 @@ public class StatementServiceImpl implements StatementService {
     public List<StatementDto.Response> getStatements(Long memberId, String startDate, String endDate) {
         return statementMapper.selectMonthlyStatements(memberId, startDate, endDate);
     }
-
-    @Override
-    public StatementDto.DownloadResponse downloadStatement(Long memberId, String statementId) {
-        return StatementDto.DownloadResponse.builder()
-                .downloadUrl("#")
-                .build();
-    }
 }

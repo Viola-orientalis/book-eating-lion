@@ -24,11 +24,4 @@ public class StatementController {
             @RequestParam(required = false) String endDate) {
         return ResponseEntity.ok(statementService.getStatements(userDetails.getMemberId(), startDate, endDate));
     }
-
-    @GetMapping("/{statementId}/download")
-    public ResponseEntity<StatementDto.DownloadResponse> downloadStatement(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @PathVariable String statementId) {
-        return ResponseEntity.ok(statementService.downloadStatement(userDetails.getMemberId(), statementId));
-    }
 }

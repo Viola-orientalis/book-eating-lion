@@ -20,12 +20,4 @@ public class StatementDto {
         private Long totalAmount;
         private Integer paymentCount;
     }
-
-    @Getter
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class DownloadResponse {
-        private String downloadUrl;
-    }
 }
