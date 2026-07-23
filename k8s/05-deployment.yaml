@@ -29,10 +29,16 @@ spec:
               topologyKey: "kubernetes.io/hostname"
       containers:
       - name: backend
-        image: team3-bookstore-backend:latest
+        image: 061039804626.dkr.ecr.ap-northeast-2.amazonaws.com/team3-bookstore-backend:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
+        envFrom:
+        - configMapRef:
+            name: backend-config
+        - secretRef:
+            name: backend-secret
+            
         resources:
           requests:
             cpu: "250m"
@@ -40,11 +46,7 @@ spec:
           limits:
             cpu: "500m"
             memory: "1Gi"
-        envFrom:
-        - configMapRef:
-            name: backend-config
-        - secretRef:
-            name: backend-secret
+            
         readinessProbe:
           httpGet:
             path: /health
