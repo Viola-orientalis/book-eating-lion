@@ -16,8 +16,10 @@ export default function ProductDetail() {
   const [quantityError, setQuantityError] = useState('')
   const [cartError, setCartError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [imageLoadFailed, setImageLoadFailed] = useState(false)
 
   useEffect(() => {
+    setImageLoadFailed(false)
     getBookDetail(id).then((res) => setProduct(res.data))
   }, [id])
 
@@ -74,7 +76,21 @@ export default function ProductDetail() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-      <div className="aspect-[3/4] rounded-lg" style={{ background: 'var(--color-line)' }} />
+      <div
+        className="aspect-[3/4] rounded-lg flex items-center justify-center overflow-hidden"
+        style={{ background: 'var(--color-line)' }}
+      >
+        {product.imageUrl && !imageLoadFailed ? (
+          <img
+            src={product.imageUrl}
+            alt={product.title}
+            className="w-full h-full object-cover"
+            onError={() => setImageLoadFailed(true)}
+          />
+        ) : (
+          <span className="text-xs" style={{ color: 'var(--color-ink)' }}>표지 준비 중</span>
+        )}
+      </div>
 
       <div>
         <h1 className="font-display text-2xl font-bold" style={{ color: 'var(--color-ink)' }}>
