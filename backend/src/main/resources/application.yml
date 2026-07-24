@@ -6,12 +6,12 @@ spring:
     name: book-eating-lion-api
   datasource:
     primary:
-      jdbc-url: jdbc:mysql://${DB_PRIMARY_HOST:${DB_HOST:localhost}}:3306/${DB_NAME:bookeatinglion}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+      jdbc-url: jdbc:mysql://${DB_PRIMARY_HOST:${DB_HOST:localhost}}:3306/${DB_NAME:database}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
       username: ${DB_USERNAME:root}
       password: ${DB_PASSWORD:root}
       driver-class-name: com.mysql.cj.jdbc.Driver
     replica:
-      jdbc-url: jdbc:mysql://${DB_REPLICA_HOST:${DB_HOST:localhost}}:3306/${DB_NAME:bookeatinglion}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+      jdbc-url: jdbc:mysql://${DB_REPLICA_HOST:${DB_HOST:localhost}}:3306/${DB_NAME:database}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
       username: ${DB_USERNAME:root}
       password: ${DB_PASSWORD:root}
       driver-class-name: com.mysql.cj.jdbc.Driver
