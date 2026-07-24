@@ -19,6 +19,7 @@ import {
   getAdminStatsSalesTrend,
   getAdminStatsDemographicPreferences,
 } from '../api/adminStats'
+import { getGenderLabel } from '../utils/genderLabels'
 
 // index.css의 --color-gold/--color-clay/--color-forest/--color-danger와 동일한 값.
 // recharts는 SVG 프레젠테이션 속성에 CSS 변수를 안정적으로 반영하지 못해 헥스값을 직접 쓴다.
@@ -112,7 +113,11 @@ const aggregateByGender = (rows) => {
     const prev = byGender.get(r.gender) ?? 0
     byGender.set(r.gender, prev + r.totalQuantitySold)
   })
-  return Array.from(byGender.entries()).map(([gender, totalQuantitySold]) => ({ gender, totalQuantitySold }))
+  return Array.from(byGender.entries()).map(([gender, totalQuantitySold]) => ({
+    gender,
+    genderLabel: getGenderLabel(gender),
+    totalQuantitySold,
+  }))
 }
 
 const TOP_BOOKS_LIMIT = 5
@@ -222,7 +227,7 @@ export default function AdminDashboard() {
           ) : genderData.length > 0 ? (
             <ResponsiveContainer width="100%" height={240}>
               <PieChart>
-                <Pie data={genderData} dataKey="totalQuantitySold" nameKey="gender" outerRadius={80} label>
+                <Pie data={genderData} dataKey="totalQuantitySold" nameKey="genderLabel" outerRadius={80} label>
                   {genderData.map((entry, i) => (
                     <Cell key={entry.gender} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                   ))}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getAdminBooks, createAdminBook, updateAdminBook, deleteAdminBook } from '../api/adminBooks'
 import ListSkeleton from '../components/skeletons/ListSkeleton'
 import Modal from '../components/Modal'
@@ -23,7 +23,7 @@ function FormField({ label, value, onChange, type = 'text', required }) {
   )
 }
 
-function AdminBookForm({ initialBook, submitting, onSubmit, onCancel }) {
+function AdminBookForm({ formRef, initialBook, submitting, onSubmit, onCancel }) {
   const [form, setForm] = useState(() => ({
     title: initialBook?.title ?? '',
     author: initialBook?.author ?? '',
@@ -52,6 +52,7 @@ function AdminBookForm({ initialBook, submitting, onSubmit, onCancel }) {
 
   return (
     <form
+      ref={formRef}
       onSubmit={handleSubmit}
       className="rounded-xl border shadow-sm p-5 mb-6 flex flex-col gap-3"
       style={{ borderColor: 'var(--color-line)', background: 'var(--color-paper-soft)' }}
@@ -138,6 +139,15 @@ export default function AdminBooks() {
   const [submitting, setSubmitting] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [deleting, setDeleting] = useState(false)
+  const formRef = useRef(null)
+
+  // 등록/수정 폼이 열리면(또는 수정 대상이 바뀌면) 폼 위치로 스크롤한다.
+  // 취소 시(formMode -> null)에는 트리거되지 않아 사용자가 보던 위치가 그대로 유지된다.
+  useEffect(() => {
+    if (formMode) {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [formMode, editingBook])
 
   const load = () => {
     setLoading(true)
@@ -214,6 +224,7 @@ export default function AdminBooks() {
 
       {formMode && (
         <AdminBookForm
+          formRef={formRef}
           initialBook={editingBook}
           submitting={submitting}
           onSubmit={handleSubmit}
