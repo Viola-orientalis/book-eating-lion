@@ -22,7 +22,7 @@ class AdminStatsServiceTest {
     private AdminStatsMapper adminStatsMapper;
 
     @InjectMocks
-    private AdminStatsServiceImpl adminStatsService;
+    private AdminStatsQueryService adminStatsService;
 
     @Test
     @DisplayName("대시보드 요약 통계 조회 테스트")

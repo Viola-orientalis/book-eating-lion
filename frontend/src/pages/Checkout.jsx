@@ -106,7 +106,7 @@ export default function Checkout() {
           결제가 완료되었습니다
         </p>
         <p className="text-sm mb-6" style={{ color: 'var(--color-clay)' }}>
-          명세서는 결제내역에서 확인하실 수 있어요
+          영수증은 결제내역에서 확인하실 수 있어요
         </p>
         <button
           onClick={() => navigate('/payments')}

@@ -13,11 +13,9 @@ import lombok.Getter;
 public class CustomUserDetails implements UserDetails {
 
     private Long memberId;
-    private String username; // email 용도로 사용
+    private String username;
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
-
-    // 추가 사용자 정보
     private String role;
     private String name;
 

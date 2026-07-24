@@ -66,4 +66,17 @@ public class OrderDto {
         private LocalDateTime createdAt;
         private List<ItemResponse> orderItems;
     }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AdminResponse {
+        private Long orderId;
+        private Long memberId;
+        private String loginId;
+        private Long totalAmount;
+        private OrderStatus orderStatus;
+        private LocalDateTime createdAt;
+    }
 }

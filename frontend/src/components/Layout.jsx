@@ -172,7 +172,7 @@ export default function Layout() {
                       className="block px-4 py-2.5 text-sm hover:bg-[var(--color-line)]/40"
                       style={{ color: 'var(--color-ink)' }}
                     >
-                      명세서 다운로드
+                      영수증 다운로드
                     </Link>
 
                     {showAdminMenu && (

@@ -27,6 +27,9 @@ public class KakaoPayService {
     @Value("${kakaopay.api-url:https://open-api.kakaopay.com}")
     private String apiUrl;
 
+    @Value("${app.frontend-url:https://ajttk.com}")
+    private String frontendUrl;
+
     private final RestTemplate restTemplate;
 
     public KakaoPayService(RestTemplate restTemplate) {
@@ -47,9 +50,9 @@ public class KakaoPayService {
         parameters.put("tax_free_amount", 0);
 
         // redirect URLs pointing to the frontend
-        parameters.put("approval_url", "http://localhost:5173/checkout?status=success&orderId=" + orderId);
-        parameters.put("cancel_url", "http://localhost:5173/checkout?status=cancel&orderId=" + orderId);
-        parameters.put("fail_url", "http://localhost:5173/checkout?status=fail&orderId=" + orderId);
+        parameters.put("approval_url", frontendUrl + "/checkout?status=success&orderId=" + orderId);
+        parameters.put("cancel_url", frontendUrl + "/checkout?status=cancel&orderId=" + orderId);
+        parameters.put("fail_url", frontendUrl + "/checkout?status=fail&orderId=" + orderId);
 
         HttpHeaders headers = getHeaders();
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(parameters, headers);

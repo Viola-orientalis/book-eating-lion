@@ -43,8 +43,10 @@ export const getMyPayments = async () => {
 // 백엔드에 receipt API 없음 - 프론트 자체 생성만 사용
 // fallbackPayment: 실제 백엔드에서 조회한 결제라 로컬 mock 저장소에는 없는 경우를 대비해,
 // 화면에 이미 로드되어 있는 결제 목록(payments state)에서 찾은 항목을 넘겨준다.
-export const getPaymentReceipt = async (paymentId, fallbackPayment) => {
-  return mockGetPaymentReceipt(paymentId, fallbackPayment)
+// buyerName: 실제 백엔드 결제는 응답(HistoryResponse)에 구매자 정보가 없어 로컬 mock
+// 유저 테이블에서 못 찾으므로, 로그인한 사용자 이름(호출부의 AuthContext)을 폴백으로 넘긴다.
+export const getPaymentReceipt = async (paymentId, fallbackPayment, buyerName) => {
+  return mockGetPaymentReceipt(paymentId, fallbackPayment, buyerName)
 }
 
 // 차후 구현: 카카오페이 연동 (POST /api/kakaopay/ready, POST /api/kakaopay/approve)

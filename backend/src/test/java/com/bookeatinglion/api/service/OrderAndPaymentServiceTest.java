@@ -41,10 +41,10 @@ class OrderAndPaymentServiceTest {
     private KakaoPayService kakaoPayService;
 
     @InjectMocks
-    private OrderServiceImpl orderService;
+    private OrderCommandService orderService;
 
     @InjectMocks
-    private PaymentServiceImpl paymentService;
+    private PaymentCommandService paymentService;
 
     private Book testBook;
     private Card testCard;
