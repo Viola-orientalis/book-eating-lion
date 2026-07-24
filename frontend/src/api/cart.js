@@ -9,7 +9,6 @@ export const getCart = async () => {
 export const addCartItem = async (payload) => {
   return await apiClient.post('/api/cart', payload)
 }
-// payload 예시: { bookId, quantity }
 
 // 수량 변경
 export const updateCartItem = async (cartItemId, payload) => {
