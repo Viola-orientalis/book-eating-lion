@@ -74,4 +74,4 @@ jobs:
 
       - name: Check Rollout Status
         run: |
-          kubectl rollout status deployment/backend-deployment -n lion-app --timeout=300s
+          kubectl rollout status deployment/backend-deployment -n lion-app --timeout=600s

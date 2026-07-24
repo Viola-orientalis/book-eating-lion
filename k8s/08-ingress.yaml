@@ -11,6 +11,7 @@ metadata:
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-northeast-2:061039804626:certificate/6000fb1e-05bd-4cc0-b265-5a621d6b2364 # ACM 인증서 ARN
     alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/healthcheck-path: "/health"
 spec:
   rules:
   - host: api.ajttk.com # Route 53에 등록된 실제 도메인 주소 기입
