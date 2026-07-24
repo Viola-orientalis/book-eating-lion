@@ -1,8 +1,13 @@
 import axios from 'axios'
 
-// 프록시 기반 라우팅만 허용 (Docker Nginx 프록시 또는 CloudFront 라우팅)
-// CORS 문제를 원천 차단하기 위해 무조건 상대 경로("")만 사용합니다.
-const baseURL = ''
+// 로컬 개발: VITE_API_BASE_URL 미설정 시 빈 문자열로 폴백 -> vite.config.js의 /api
+// 프록시(→ localhost:8080)를 그대로 탄다. .env.example처럼 .env.local에 직접 설정하면
+// 프록시 없이 그 주소로 바로 붙을 수도 있다.
+// 배포: .env.production의 VITE_API_BASE_URL(https://api.ajttk.com)로 백엔드를 직접 호출한다.
+// CloudFront에 /api/* 라우팅 규칙이 없어 상대 경로가 실패하던 문제라 직접 호출로 전환.
+// CORS: 백엔드가 https://ajttk.com을 허용 origin에 추가해야 한다(SecurityConfig.java
+// corsConfigurationSource) - 프론트 코드로는 해결 불가한 영역이니 백엔드 쪽 확인 필요.
+const baseURL = import.meta.env.VITE_API_BASE_URL || ''
 
 export const apiClient = axios.create({
   baseURL,
