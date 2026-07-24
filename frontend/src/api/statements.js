@@ -10,4 +10,13 @@ export const getStatements = async ({ startDate, endDate } = {}) => {
     // 백엔드 미연결 시 결제 내역을 월 단위로 묶어 목 명세서로 대체
     return mockGetStatements({ startDate, endDate })
   }
+// 명세서 다운로드
+export const downloadStatement = async (statementId) => {
+  try {
+    return await apiClient.get(`/api/statements/${statementId}/download`, { responseType: 'blob' })
+  } catch {
+    // 백엔드 미연결 시 목 명세서 다운로드로 대체
+    return mockDownloadStatement(statementId)
+  }
+}
 }
