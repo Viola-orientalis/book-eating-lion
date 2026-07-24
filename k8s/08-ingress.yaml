@@ -7,16 +7,11 @@ metadata:
     kubernetes.io/ingress.class: "nginx"
 spec:
   ingressClassName: nginx
-  tls:
-  - hosts:
-    - api.ajttk.com
-    secretName: api-ajttk-tls
   rules:
   - host: api.ajttk.com # Route 53에 등록된 실제 도메인 주소 기입
     http:
       paths:
-      # API 요청 (/api/*) -> Backend Service
-      - path: /api
+      - path: /
         pathType: Prefix
         backend:
           service:
