@@ -501,19 +501,11 @@
   ]
   ```
 
-### 7.2 명세서 다운로드 (S3 URL 반환)
+### 7.2 명세서 다운로드
 
-**Method**: `GET`
-
-- **URL**: `/api/statements/{statementId}/download`
-- **Response**: `200 OK`
-
-  ```json
-  {
-    "statementId": 1,
-    "downloadUrl": "https://s3.ap-northeast-2.amazonaws.com/mybucket/statements/1.pdf"
-  }
-  ```
+백엔드 다운로드 API(`/api/statements/{statementId}/download`)는 CQRS 리팩토링 과정에서
+제거되었다(StatementController/DTO 정리 커밋 6a0f560). PDF는 프론트엔드가 7.1 목록 조회
+응답만으로 자체 생성한다(`frontend/src/api/mockStatements.js`, `receiptPdfKit.js`).
 
 ---
 

@@ -1,10 +1,10 @@
 import { readMockList, writeMockList, nextMockId, mockApiError } from './mockStorage'
 import { getMockSessionUserId } from './mockSession'
 import { getMockCardById, adjustMockCardUsage } from './mockCards'
-import { getMockOrderById, setMockOrderStatus } from './mockOrders'
+import { getMockOrderById, resolveOrderForReceipt, setMockOrderStatus } from './mockOrders'
 import { decrementMockStock, incrementMockStock } from './mockStock'
 import { USERS_KEY } from './mockAuth'
-import { renderElementToPdfUrl, createOffscreenContainer, appendTextLine } from './mockPdf'
+import { renderReceiptPdf } from './mockPdf'
 import { getStatusLabel } from '../utils/statusLabels'
 
 export const PAYMENTS_KEY = 'bookmeogeun-mock-payments'
@@ -101,80 +101,46 @@ export const mockGetMyPayments = () => {
   return { data: payments.map(toPaymentResponse) }
 }
 
-// 결제 1건짜리 즉석 영수증. 실제 "명세서"(REQ-08, 기간별)는 statements.js/mockStatements.js로
-// 분리했고, 이 함수는 결제내역 페이지의 데모용 즉석 PDF 미리보기 용도로만 남겨둔다.
-const buildReceiptElement = (payment, order, buyerName, card) => {
-  const el = createOffscreenContainer(600)
-
-  const title = document.createElement('h2')
-  title.style.cssText = 'margin:0 0 16px;font-size:18px;'
-  title.textContent = `${MERCHANT_NAME} 결제 명세서`
-  el.appendChild(title)
-
-  appendTextLine(el, `구매자: ${buyerName ?? '알 수 없음'}`)
-  appendTextLine(el, `결제번호: ${payment.id}`)
-  appendTextLine(el, `결제일시: ${new Date(payment.createdAt).toLocaleString()}`)
-  appendTextLine(el, `결제수단: 신용카드 (${card?.maskedCardNumber ?? '알 수 없음'})`)
-  appendTextLine(el, `상태: ${getStatusLabel(payment.status)}`)
-
-  const table = document.createElement('table')
-  table.style.cssText =
-    'width:100%;border-collapse:collapse;margin-top:16px;border-top:1px solid #ccc;padding-top:8px;'
-  ;(order?.orderItems ?? []).forEach((i) => {
-    const row = document.createElement('tr')
-
-    const titleCell = document.createElement('td')
-    titleCell.style.padding = '4px 0'
-    titleCell.textContent = i.title
-    row.appendChild(titleCell)
-
-    const qtyCell = document.createElement('td')
-    qtyCell.style.cssText = 'padding:4px 0;text-align:center;'
-    qtyCell.textContent = `x${i.quantity}`
-    row.appendChild(qtyCell)
-
-    const priceCell = document.createElement('td')
-    priceCell.style.cssText = 'padding:4px 0;text-align:right;'
-    priceCell.textContent = `${(i.price * i.quantity).toLocaleString()}원`
-    row.appendChild(priceCell)
-
-    table.appendChild(row)
-  })
-  el.appendChild(table)
-
-  const total = document.createElement('p')
-  total.style.cssText = 'margin-top:16px;font-weight:bold;font-size:14px;'
-  total.textContent = `총 결제금액: ${payment.amount.toLocaleString()}원`
-  el.appendChild(total)
-
-  return el
-}
-
-// 화면에 이미 로드된 결제 목록(getMyPayments 응답, toPaymentResponse와 동일한 평탄화 형태)을
-// 내부에서 쓰는 raw 저장 형태({ id, ... })에 맞춰 변환한다.
+// 화면에 이미 로드된 결제 목록을 내부에서 쓰는 raw 저장 형태({ id, merchantName,
+// createdAt, ... })에 맞춰 변환한다. 화면 목록은 실제 백엔드 응답(PaymentDto.HistoryResponse:
+// { paymentId, orderId, cardId, amount, orderTitle, status, approvedAt })을 그대로 쓰고
+// 있으므로(Payments.jsx도 p.orderTitle/p.approvedAt을 읽음), merchantName이 아니라
+// orderTitle, createdAt이 아니라 approvedAt에서 값을 가져와야 한다.
 const normalizeFallbackPayment = (payment) => ({
   id: payment.paymentId,
   orderId: payment.orderId,
   cardId: payment.cardId,
   amount: payment.amount,
-  merchantName: payment.merchantName,
+  merchantName: payment.orderTitle,
   status: payment.status,
-  createdAt: payment.createdAt,
+  createdAt: payment.approvedAt,
 })
 
 // 결제 건당 즉석 영수증 다운로드 (데모/미리보기 목적의 임시 구현)
 // 실제 백엔드에서 조회한 결제는 로컬 mock 저장소(PAYMENTS_KEY)에 없으므로, 거기서 못 찾으면
 // 화면에 이미 로드되어 있던 결제 데이터(fallbackPayment)로 대체해 PDF를 생성한다.
-export const mockGetPaymentReceipt = async (paymentId, fallbackPayment) => {
+// buyerName: 실제 백엔드 결제는 로컬 mock 유저 테이블(USERS_KEY)에 대응하는 userId가 없어
+// 구매자를 못 찾으므로, 호출부(Payments.jsx)에서 로그인 사용자 이름을 폴백으로 넘겨준다.
+// 로컬 mock 결제는 기존처럼 USERS_KEY 조회가 우선이고, 이건 그 조회가 실패했을 때만 쓰인다.
+export const mockGetPaymentReceipt = async (paymentId, fallbackPayment, buyerName) => {
   const stored = readMockList(PAYMENTS_KEY).find((p) => p.id === Number(paymentId))
   const payment = stored ?? (fallbackPayment && normalizeFallbackPayment(fallbackPayment))
   if (!payment) throw mockApiError('결제 내역을 찾을 수 없습니다.', 'PAYMENT_NOT_FOUND')
 
-  const order = getMockOrderById(payment.orderId)
+  const order = await resolveOrderForReceipt(payment.orderId)
   const buyer = readMockList(USERS_KEY).find((u) => u.id === payment.userId)
   const card = getMockCardById(payment.cardId)
 
-  const element = buildReceiptElement(payment, order, buyer?.name, card)
-  const url = await renderElementToPdfUrl(element)
+  const url = await renderReceiptPdf({
+    merchantName: payment.merchantName || MERCHANT_NAME,
+    buyerName: buyer?.name || buyerName,
+    paymentId: payment.id,
+    approvalNumber: payment.approvalNumber,
+    createdAt: payment.createdAt,
+    maskedCardNumber: card?.maskedCardNumber,
+    statusLabel: getStatusLabel(payment.status),
+    items: order?.orderItems,
+    amount: payment.amount,
+  })
   return { data: { url } }
 }

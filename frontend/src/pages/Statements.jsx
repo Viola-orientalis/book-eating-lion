@@ -27,7 +27,7 @@ export default function Statements() {
       .then((res) => setStatements(res.data))
       .catch((err) => {
         setStatements([])
-        showError(getErrorMessage(err, '명세서 목록을 불러오지 못했습니다.'))
+        showError(getErrorMessage(err, '영수증 목록을 불러오지 못했습니다.'))
       })
       .finally(() => {
         setLoading(false)
@@ -52,7 +52,7 @@ export default function Statements() {
       const res = await downloadStatement(statementId)
       window.open(res.data.downloadUrl, '_blank')
     } catch (err) {
-      showError(getErrorMessage(err, '명세서 다운로드에 실패했습니다.'))
+      showError(getErrorMessage(err, '영수증 다운로드에 실패했습니다.'))
     } finally {
       setDownloadingId(null)
     }
@@ -61,7 +61,7 @@ export default function Statements() {
   return (
     <div>
       <h1 className="font-display text-3xl font-bold mb-6" style={{ color: 'var(--color-ink)' }}>
-        명세서
+        영수증
       </h1>
 
       <form onSubmit={handleSearch} className="flex items-end gap-3 mb-6 flex-wrap">
@@ -99,7 +99,7 @@ export default function Statements() {
         <ListSkeleton rows={3} />
       ) : statements.length === 0 ? (
         <p className="text-sm" style={{ color: 'var(--color-clay)' }}>
-          {searched ? '해당 기간에 명세서가 없습니다' : ''}
+          {searched ? '해당 기간에 영수증이 없습니다' : ''}
         </p>
       ) : (
         <div className="flex flex-col gap-3">

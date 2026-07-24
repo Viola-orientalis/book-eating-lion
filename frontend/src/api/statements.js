@@ -11,3 +11,8 @@ export const getStatements = async ({ startDate, endDate } = {}) => {
     return mockGetStatements({ startDate, endDate })
   }
 }
+
+// 백엔드에 명세서 다운로드 API 없음(StatementController/DTO 제거 커밋 6a0f560) - 프론트 자체 생성만 사용
+export const downloadStatement = async (statementId) => {
+  return mockDownloadStatement(statementId)
+}
