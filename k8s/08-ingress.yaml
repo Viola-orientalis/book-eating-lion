@@ -24,6 +24,27 @@ spec:
             name: backend
             port:
               number: 8080
+---
+# 그라파나 Ingress 설정
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana-ingress
+  namespace: monitoring
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+  - host: grafana.ajttk.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: prometheus-stack-grafana
+            port:
+              number: 80
 
 # # 로컬 테스트용
 # apiVersion: networking.k8s.io/v1
