@@ -17,4 +17,6 @@ public interface OrderMapper {
     List<Order> findByMemberId(Long memberId);
     List<OrderItem> findItemsByOrderId(Long orderId);
     void updateStatus(@Param("orderId") Long orderId, @Param("status") OrderStatus status);
+    List<com.bookeatinglion.api.dto.OrderDto.AdminResponse> findAllAdminOrders(@Param("status") String status, @Param("offset") int offset, @Param("size") int size);
+    long countAllAdminOrders(@Param("status") String status);
 }

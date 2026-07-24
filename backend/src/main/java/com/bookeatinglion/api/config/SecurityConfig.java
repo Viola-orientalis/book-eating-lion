@@ -31,6 +31,9 @@ public class SecurityConfig {
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
     private final RestAccessDeniedHandler restAccessDeniedHandler;
 
+    @org.springframework.beans.factory.annotation.Value("${app.cors-allowed-origins}")
+    private List<String> corsAllowedOrigins;
+
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -77,7 +80,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
-        cfg.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000")); // 프론트 서버 허용
+        cfg.setAllowedOrigins(corsAllowedOrigins); // 프론트 및 API 도메인 허용
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")); // HTTP 메서드 허용
         cfg.setAllowedHeaders(List.of("*")); // 모든 헤더 허용 (Authorization 등)
         cfg.setAllowCredentials(true); // 쿠키/인증정보 통신 허용

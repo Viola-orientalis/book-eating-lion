@@ -2,7 +2,8 @@ package com.bookeatinglion.api.controller;
 
 import com.bookeatinglion.api.dto.OrderDto;
 import com.bookeatinglion.api.security.CustomUserDetails;
-import com.bookeatinglion.api.service.OrderService;
+import com.bookeatinglion.api.service.OrderCommandService;
+import com.bookeatinglion.api.service.OrderQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,18 +18,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderController {
 
-    private final OrderService orderService;
+    private final OrderCommandService orderCommandService;
+    private final OrderQueryService orderQueryService;
 
     @PostMapping
     public ResponseEntity<OrderDto.CreateResponse> createOrder(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody OrderDto.CreateRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(userDetails.getMemberId(), request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderCommandService.createOrder(userDetails.getMemberId(), request));
     }
 
     @GetMapping
     public ResponseEntity<List<OrderDto.Response>> getMyOrders(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(orderService.getMyOrders(userDetails.getMemberId()));
+        return ResponseEntity.ok(orderQueryService.getMyOrders(userDetails.getMemberId()));
     }
 }

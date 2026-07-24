@@ -1,51 +1,97 @@
-// 브라우저에서 렌더링한 오프스크린 요소를 캡처해 PDF Blob URL로 만드는 공용 헬퍼.
-// (mockPayments.js의 결제 명세서, mockStatements.js의 기간별 명세서가 함께 사용한다)
-// 텍스트 대신 이미지로 캡처하는 이유: jsPDF 기본 폰트(Helvetica 등)는 한글 글리프가 없어
-// doc.text()로 직접 그리면 글자가 깨진다. html2canvas로 브라우저가 렌더링한 화면을
-// 그대로 캡처해 이미지로 삽입하면 한글도 정상적으로 나온다.
-// jspdf/html2canvas는 이 함수를 실제로 호출할 때만 필요하므로(영수증/명세서 다운로드
-// 시점) 동적 import로 초기 번들에서 분리한다.
-export const renderElementToPdfUrl = async (element) => {
-  const [{ jsPDF }, { default: html2canvas }] = await Promise.all([
-    import('jspdf'),
-    import('html2canvas'),
-  ])
+import { formatDateTime } from '../utils/formatDate'
+import {
+  PDF_FONT,
+  PDF_MARGIN,
+  PDF_PAGE_WIDTH,
+  COLOR_CLAY,
+  formatWon,
+  drawHeader,
+  drawLabelValueRow,
+  drawSolidDivider,
+  drawDashedDivider,
+  drawTotalRow,
+  drawThankYouFooter,
+  tableTheme,
+  renderVectorPdf,
+} from './receiptPdfKit'
 
-  document.body.appendChild(element)
-  try {
-    // 붙인 직후에는 브라우저가 아직 레이아웃/페인트를 끝내지 않았을 수 있어 한 프레임 대기
-    await new Promise((resolve) => requestAnimationFrame(resolve))
+// 결제 1건짜리 영수증 내용을 그린다. renderVectorPdf가 페이지 높이를 정하기 위해
+// 이 함수를 두 번(측정 1회 + 실제 렌더 1회) 호출하므로 순수하게 그리기만 담당한다.
+const drawReceiptContent = (doc, autoTable, values) => {
+  const {
+    merchantName,
+    buyerName,
+    paymentId,
+    approvalNumber,
+    createdAt,
+    maskedCardNumber,
+    statusLabel,
+    items,
+    amount,
+  } = values
 
-    const canvas = await html2canvas(element, { backgroundColor: '#ffffff', scale: 2 })
-    const imageData = canvas.toDataURL('image/png')
+  let y = drawHeader(doc, merchantName, '영수증')
 
-    const doc = new jsPDF({ unit: 'pt', format: 'a4' })
-    const margin = 24
-    const imageWidth = doc.internal.pageSize.getWidth() - margin * 2
-    const imageHeight = (canvas.height / canvas.width) * imageWidth
-    doc.addImage(imageData, 'PNG', margin, margin, imageWidth, imageHeight)
+  const infoRows = [
+    ['발급일시', formatDateTime(createdAt)],
+    ['승인번호', approvalNumber || '-'],
+    ['결제수단', maskedCardNumber || '-'],
+    ['구매자', buyerName || '알 수 없음'],
+    ['상태', statusLabel || '-'],
+  ]
+  infoRows.forEach(([label, value]) => {
+    drawLabelValueRow(doc, y, label, value)
+    y += 5
+  })
 
-    const blob = doc.output('blob')
-    return URL.createObjectURL(blob)
-  } finally {
-    document.body.removeChild(element)
+  y += 1
+  drawDashedDivider(doc, y)
+  y += 6
+
+  const lineItems = items ?? []
+  if (lineItems.length > 0) {
+    autoTable(doc, {
+      startY: y,
+      margin: { left: PDF_MARGIN, right: PDF_MARGIN },
+      head: [['도서명', '수량', '단가', '금액']],
+      body: lineItems.map((i) => [
+        i.title,
+        String(i.quantity),
+        formatWon(i.price),
+        formatWon(i.price * i.quantity),
+      ]),
+      ...tableTheme,
+      columnStyles: {
+        0: { halign: 'left' },
+        1: { halign: 'center', cellWidth: 10 },
+        2: { halign: 'right' },
+        3: { halign: 'right' },
+      },
+    })
+    y = doc.lastAutoTable.finalY + 6
+  } else {
+    doc.setFont(PDF_FONT, 'normal')
+    doc.setFontSize(8)
+    doc.setTextColor(...COLOR_CLAY)
+    doc.text('구매 품목 정보를 불러올 수 없습니다', PDF_PAGE_WIDTH / 2, y, { align: 'center' })
+    y += 8
   }
+
+  if (lineItems.length > 0) {
+    const subtotal = lineItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
+    drawLabelValueRow(doc, y, '소계', formatWon(subtotal))
+    y += 6
+  }
+
+  drawSolidDivider(doc, y)
+  y += 7
+  drawTotalRow(doc, y, '총 결제금액', amount)
+  y += 9
+
+  return drawThankYouFooter(doc, y, `결제번호 ${paymentId}`)
 }
 
-// 오프스크린 캡처용 컨테이너. opacity:0은 html2canvas가 투명하게(=백지로) 캡처하는
-// 원인이 될 수 있어 쓰지 않고, 화면 밖(left:-99999px)으로만 밀어낸다. width/배경/글자색도
-// 상속에 기대지 않고 인라인으로 명시한다.
-export const createOffscreenContainer = (width = 600) => {
-  const el = document.createElement('div')
-  el.style.cssText =
-    `position:fixed;top:0;left:-99999px;width:${width}px;padding:24px;background-color:#ffffff;color:#000000;font-family:sans-serif;font-size:12px;`
-  return el
-}
-
-// 사용자 입력(이름 등)이 섞일 수 있는 값들이 있어 항상 textContent만 사용해 XSS를 방지한다.
-export const appendTextLine = (parent, text, styleOverrides = '') => {
-  const p = document.createElement('p')
-  p.style.cssText = `margin:4px 0;${styleOverrides}`
-  p.textContent = text
-  parent.appendChild(p)
-}
+// payment/order/buyer/card 조회는 호출부(mockPayments.js)의 책임이고, 여기서는 이미
+// 조합된 값만 받아서 그리기만 한다.
+export const renderReceiptPdf = async (values) =>
+  renderVectorPdf((doc, autoTable) => drawReceiptContent(doc, autoTable, values))

@@ -5,10 +5,12 @@ import { formatDateTime } from '../utils/formatDate'
 import ListSkeleton from '../components/skeletons/ListSkeleton'
 import Modal from '../components/Modal'
 import { useToast } from '../context/ToastContext'
+import { useAuth } from '../context/AuthContext'
 import { getErrorMessage } from '../utils/errorMessage'
 
 export default function Payments() {
   const { showError } = useToast()
+  const { user } = useAuth()
   const [payments, setPayments] = useState([])
   const [loading, setLoading] = useState(true)
   const [cancellingId, setCancellingId] = useState(null)
@@ -67,9 +69,11 @@ export default function Payments() {
     setReceiptLoadingId(paymentId)
     try {
       // 로컬 mock 저장소에 없는(실제 백엔드에서 온) 결제도 PDF를 만들 수 있도록,
-      // 이미 화면에 로드된 결제 데이터를 폴백으로 함께 넘긴다.
+      // 이미 화면에 로드된 결제 데이터를 폴백으로 함께 넘긴다. 구매자 이름도 실제 백엔드
+      // 응답(HistoryResponse)엔 없으므로, 로그인 사용자 정보(useAuth)에서 넘겨준다 —
+      // 어차피 "내 결제 내역"이라 로그인한 사용자 = 구매자다.
       const fallbackPayment = payments.find((p) => p.paymentId === paymentId)
-      const res = await getPaymentReceipt(paymentId, fallbackPayment)
+      const res = await getPaymentReceipt(paymentId, fallbackPayment, user?.name)
       window.open(res.data.url, '_blank')
     } catch (err) {
       showError(getErrorMessage(err, '영수증을 불러오지 못했습니다.'))
@@ -130,7 +134,7 @@ export default function Payments() {
                     className="text-sm px-3 py-1.5 rounded-lg border transition-colors hover:bg-[var(--color-line)]/40 disabled:opacity-50"
                     style={{ borderColor: 'var(--color-gold)', color: 'var(--color-gold)' }}
                   >
-                    {receiptLoadingId === p.paymentId ? '불러오는 중...' : '명세서'}
+                    {receiptLoadingId === p.paymentId ? '불러오는 중...' : '영수증'}
                   </button>
                   {p.status === 'APPROVED' && (
                     <button

@@ -17,6 +17,7 @@ Thumbs.db
 node_modules/
 
 # Secrets
+**/src/main/resources/application.yml
 
 # Log
 logs/

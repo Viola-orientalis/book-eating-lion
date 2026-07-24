@@ -13,8 +13,11 @@ TRUNCATE TABLE Members;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- 1. 테스트 유저 생성 (비밀번호는 1234)
-INSERT INTO Members (username, password, name, gender, age, role) 
-VALUES ('testuser', '$2a$10$fHX4VHdsN2kPrh0GJgNjjeIb.FZJ6ApJZf5UFoUZaO.D8j3y2CqXK', '테스트유저', 'MALE', 25, 'USER');
+INSERT INTO Members (username, password, name, gender, age, role) VALUES 
+('testuser1', '$2a$10$fHX4VHdsN2kPrh0GJgNjjeIb.FZJ6ApJZf5UFoUZaO.D8j3y2CqXK', '테스트유저1', 'MALE', 25, 'USER'),
+('testuser2', '$2a$10$fHX4VHdsN2kPrh0GJgNjjeIb.FZJ6ApJZf5UFoUZaO.D8j3y2CqXK', '테스트유저2', 'FEMALE', 19, 'USER'),
+('testuser3', '$2a$10$fHX4VHdsN2kPrh0GJgNjjeIb.FZJ6ApJZf5UFoUZaO.D8j3y2CqXK', '테스트유저3', 'MALE', 35, 'USER'),
+('testuser4', '$2a$10$fHX4VHdsN2kPrh0GJgNjjeIb.FZJ6ApJZf5UFoUZaO.D8j3y2CqXK', '테스트유저4', 'FEMALE', 42, 'USER');
 
 -- 2. 테스트 관리자(ADMIN) 생성 (비밀번호 1234)
 INSERT INTO Members (username, password, name, gender, age, role) 

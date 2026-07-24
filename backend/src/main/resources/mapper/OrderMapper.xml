@@ -54,4 +54,32 @@
         WHERE order_id = #{orderId}
     </update>
 
+    <select id="findAllAdminOrders" resultType="com.bookeatinglion.api.dto.OrderDto$AdminResponse">
+        SELECT o.order_id as orderId,
+               o.member_id as memberId,
+               m.username as loginId,
+               o.total_amount as totalAmount,
+               o.order_status as orderStatus,
+               o.created_at as createdAt
+        FROM Orders o
+        LEFT JOIN Members m ON o.member_id = m.member_id
+        <where>
+            <if test="status != null and status != ''">
+                o.order_status = #{status}
+            </if>
+        </where>
+        ORDER BY o.order_id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="countAllAdminOrders" resultType="long">
+        SELECT COUNT(*)
+        FROM Orders o
+        <where>
+            <if test="status != null and status != ''">
+                o.order_status = #{status}
+            </if>
+        </where>
+    </select>
+
 </mapper>
