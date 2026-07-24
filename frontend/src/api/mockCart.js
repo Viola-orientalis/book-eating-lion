@@ -1,5 +1,5 @@
 import { readMockList, writeMockList, nextMockId, mockApiError } from './mockStorage'
-import { getMockSessionUserId } from './mockSession'
+import { getMockSessionUserId, isMockOrRealSessionActive } from './mockSession'
 import { MOCK_BOOKS } from './mockBooks'
 
 // 실제 백엔드가 붙기 전까지 "서버 DB"를 흉내내는 임시 저장소.
@@ -21,7 +21,7 @@ const toResponseItem = (item) => {
 // (판매 종료 도서 대조는 Cart.jsx/Checkout.jsx가 getBooks()를 다시 조회해 프론트에서 처리)
 export const mockGetCart = () => {
   const userId = getMockSessionUserId()
-  if (!userId) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
+  if (!isMockOrRealSessionActive()) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
 
   const mine = readMockList(CART_KEY).filter((i) => i.userId === userId)
   return { data: mine.map(toResponseItem) }
@@ -29,7 +29,7 @@ export const mockGetCart = () => {
 
 export const mockAddCartItem = ({ bookId, quantity }) => {
   const userId = getMockSessionUserId()
-  if (!userId) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
+  if (!isMockOrRealSessionActive()) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
 
   const normalizedBookId = Number(bookId)
   const all = readMockList(CART_KEY)
@@ -47,7 +47,7 @@ export const mockAddCartItem = ({ bookId, quantity }) => {
 
 export const mockUpdateCartItem = (cartItemId, { quantity }) => {
   const userId = getMockSessionUserId()
-  if (!userId) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
+  if (!isMockOrRealSessionActive()) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
 
   const all = readMockList(CART_KEY)
   const item = all.find((i) => i.id === Number(cartItemId) && i.userId === userId)
@@ -63,7 +63,7 @@ export const mockUpdateCartItem = (cartItemId, { quantity }) => {
 
 export const mockRemoveCartItem = (cartItemId) => {
   const userId = getMockSessionUserId()
-  if (!userId) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
+  if (!isMockOrRealSessionActive()) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
 
   const all = readMockList(CART_KEY)
   const item = all.find((i) => i.id === Number(cartItemId) && i.userId === userId)

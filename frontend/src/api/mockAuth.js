@@ -1,5 +1,10 @@
 import { readMockList, writeMockList, nextMockId, mockApiError } from './mockStorage'
-import { getMockSessionUserId, setMockSessionUserId, clearMockSessionUserId } from './mockSession'
+import {
+  getMockSessionUserId,
+  setMockSessionUserId,
+  clearMockSessionUserId,
+  isMockOrRealSessionActive,
+} from './mockSession'
 
 export const USERS_KEY = 'bookmeogeun-mock-users'
 const DEFAULT_ROLE = 'USER'
@@ -65,7 +70,7 @@ export const mockGetMyInfo = () => {
 
 export const mockDeleteAccount = () => {
   const userId = getMockSessionUserId()
-  if (!userId) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
+  if (!isMockOrRealSessionActive()) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
   writeMockList(
     USERS_KEY,
     readMockList(USERS_KEY).filter((u) => u.id !== userId)

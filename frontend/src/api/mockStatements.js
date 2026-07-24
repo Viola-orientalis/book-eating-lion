@@ -1,5 +1,5 @@
 import { readMockList, mockApiError } from './mockStorage'
-import { getMockSessionUserId } from './mockSession'
+import { getMockSessionUserId, isMockOrRealSessionActive } from './mockSession'
 import { PAYMENTS_KEY, MERCHANT_NAME } from './mockPayments'
 import { getMockCardById } from './mockCards'
 import { resolveOrdersForReceipts } from './mockOrders'
@@ -42,7 +42,7 @@ const toCompactCardNumber = (maskedCardNumber) => {
 // GET /api/statements?startDate=&endDate= 목 구현
 export const mockGetStatements = ({ startDate, endDate } = {}) => {
   const userId = getMockSessionUserId()
-  if (!userId) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
+  if (!isMockOrRealSessionActive()) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
 
   const start = startDate ? new Date(startDate) : new Date(0)
   const end = endDate ? new Date(endDate) : new Date()
@@ -132,7 +132,7 @@ const drawStatementContent = (doc, autoTable, { monthKey, merchantName, periodSt
 // GET /api/statements/{statementId}/download 목 구현
 export const mockDownloadStatement = async (statementId) => {
   const userId = getMockSessionUserId()
-  if (!userId) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
+  if (!isMockOrRealSessionActive()) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
 
   const monthKey = String(statementId)
   const [year, month] = monthKey.split('-').map(Number)
