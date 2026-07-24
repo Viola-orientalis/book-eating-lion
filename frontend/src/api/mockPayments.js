@@ -1,5 +1,5 @@
 import { readMockList, writeMockList, nextMockId, mockApiError } from './mockStorage'
-import { getMockSessionUserId } from './mockSession'
+import { getMockSessionUserId, isMockOrRealSessionActive } from './mockSession'
 import { getMockCardById, adjustMockCardUsage } from './mockCards'
 import { getMockOrderById, resolveOrderForReceipt, setMockOrderStatus } from './mockOrders'
 import { decrementMockStock, incrementMockStock } from './mockStock'
@@ -25,7 +25,7 @@ const toPaymentResponse = (payment) => ({
 // 내려오므로, 검증에 실패하면 결제 기록을 남기지 않고 바로 에러를 throw한다.
 export const mockRequestPayment = ({ orderId, cardId, idempotencyKey }) => {
   const userId = getMockSessionUserId()
-  if (!userId) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
+  if (!isMockOrRealSessionActive()) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
 
   const order = getMockOrderById(Number(orderId))
   const card = getMockCardById(Number(cardId))

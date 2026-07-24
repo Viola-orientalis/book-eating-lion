@@ -1,5 +1,5 @@
 import { readMockList, writeMockList, nextMockId, mockApiError } from './mockStorage'
-import { getMockSessionUserId } from './mockSession'
+import { getMockSessionUserId, isMockOrRealSessionActive } from './mockSession'
 import { MOCK_BOOKS } from './mockBooks'
 import { getMockStock } from './mockStock'
 import apiClient from './client'
@@ -14,7 +14,7 @@ const toCreateResponse = (order) => ({
 
 export const mockCreateOrder = ({ orderItems }) => {
   const userId = getMockSessionUserId()
-  if (!userId) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
+  if (!isMockOrRealSessionActive()) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
 
   // 재고 검증: 요청 수량이 현재 재고를 초과하면 주문 생성 자체를 막는다
   const insufficient = orderItems.find(

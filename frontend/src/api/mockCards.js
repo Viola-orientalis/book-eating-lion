@@ -1,5 +1,5 @@
 import { readMockList, writeMockList, mockApiError } from './mockStorage'
-import { getMockSessionUserId } from './mockSession'
+import { getMockSessionUserId, isMockOrRealSessionActive } from './mockSession'
 
 export const CARDS_KEY = 'bookmeogeun-mock-cards'
 const DEFAULT_MONTHLY_LIMIT = 1000000
@@ -16,7 +16,7 @@ const nextCardId = (cards) =>
 
 export const mockIssueCard = ({ monthlyLimit } = {}) => {
   const userId = getMockSessionUserId()
-  if (!userId) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
+  if (!isMockOrRealSessionActive()) throw mockApiError('로그인이 필요합니다.', 'UNAUTHENTICATED')
 
   const cards = readMockList(CARDS_KEY)
   const card = {
