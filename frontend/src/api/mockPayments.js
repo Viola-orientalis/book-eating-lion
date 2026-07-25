@@ -17,6 +17,8 @@ const toPaymentResponse = (payment) => ({
   amount: payment.amount,
   orderTitle: payment.orderTitle,
   status: payment.status,
+  approvalNumber: payment.approvalNumber,
+  paymentMethod: payment.paymentMethod,
   createdAt: payment.createdAt,
 })
 
@@ -61,6 +63,8 @@ export const mockRequestPayment = ({ orderId, cardId, idempotencyKey }) => {
     amount: order.totalAmount,
     merchantName: MERCHANT_NAME,
     status: 'APPROVED',
+    approvalNumber: String(nextMockId(payments)).padStart(8, '0'),
+    paymentMethod: 'CARD',
     idempotencyKey,
     createdAt: new Date().toISOString(),
   }
@@ -103,16 +107,20 @@ export const mockGetMyPayments = () => {
 
 // 화면에 이미 로드된 결제 목록을 내부에서 쓰는 raw 저장 형태({ id, merchantName,
 // createdAt, ... })에 맞춰 변환한다. 화면 목록은 실제 백엔드 응답(PaymentDto.HistoryResponse:
-// { paymentId, orderId, cardId, amount, orderTitle, status, approvedAt })을 그대로 쓰고
-// 있으므로(Payments.jsx도 p.orderTitle/p.approvedAt을 읽음), merchantName이 아니라
+// { paymentId, orderId, paymentMethod, amount, orderTitle, status, approvedAt })을 그대로
+// 쓰고 있으므로(Payments.jsx도 p.orderTitle/p.approvedAt을 읽음), merchantName이 아니라
 // orderTitle, createdAt이 아니라 approvedAt에서 값을 가져와야 한다.
+// 주의: HistoryResponse에는 cardId가 없다(paymentMethod만 내려옴) - 카드 마스킹 번호는
+// 로컬 mock 카드 저장소(getMockCardById)로만 조회 가능한데 실백엔드 카드 데이터는 거기
+// 없으므로, 실백엔드에서 온 CARD 결제는 마스킹 번호를 복원할 방법이 없다(백엔드가
+// HistoryResponse에 maskedCardNumber를 내려주지 않는 한 프론트에서 해결 불가).
 const normalizeFallbackPayment = (payment) => ({
   id: payment.paymentId,
   orderId: payment.orderId,
-  cardId: payment.cardId,
   amount: payment.amount,
   merchantName: payment.orderTitle,
   status: payment.status,
+  paymentMethod: payment.paymentMethod,
   createdAt: payment.approvedAt,
 })
 
@@ -137,6 +145,7 @@ export const mockGetPaymentReceipt = async (paymentId, fallbackPayment, buyerNam
     paymentId: payment.id,
     approvalNumber: payment.approvalNumber,
     createdAt: payment.createdAt,
+    paymentMethod: payment.paymentMethod,
     maskedCardNumber: card?.maskedCardNumber,
     statusLabel: getStatusLabel(payment.status),
     items: order?.orderItems,
