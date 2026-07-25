@@ -24,6 +24,7 @@ const drawReceiptContent = (doc, autoTable, values) => {
     paymentId,
     approvalNumber,
     createdAt,
+    paymentMethod,
     maskedCardNumber,
     statusLabel,
     items,
@@ -32,10 +33,23 @@ const drawReceiptContent = (doc, autoTable, values) => {
 
   let y = drawHeader(doc, merchantName, '영수증')
 
+  // paymentMethod: 'CARD' | 'KAKAOPAY'. maskedCardNumber는 로컬 mock 카드 저장소에서만
+  // 조회 가능해서, 실백엔드에서 조회한 카드 결제는 결제수단은 알아도(paymentMethod) 마스킹
+  // 번호까지는 복원이 안 될 수 있다 - 그 경우 "가상카드"까지만 표시한다.
+  const maskedCardLabel = maskedCardNumber ? `가상카드 (**** ${maskedCardNumber.slice(-4)})` : '가상카드'
+  const paymentMethodLabel =
+    paymentMethod === 'KAKAOPAY'
+      ? '카카오페이'
+      : paymentMethod === 'CARD'
+        ? maskedCardLabel
+        : maskedCardNumber
+          ? maskedCardLabel
+          : '-'
+
   const infoRows = [
     ['발급일시', formatDateTime(createdAt)],
     ['승인번호', approvalNumber || '-'],
-    ['결제수단', maskedCardNumber || '-'],
+    ['결제수단', paymentMethodLabel],
     ['구매자', buyerName || '알 수 없음'],
     ['상태', statusLabel || '-'],
   ]
