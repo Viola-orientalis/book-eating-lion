@@ -6,6 +6,7 @@ import ProductList from './pages/ProductList'
 import ProductDetail from './pages/ProductDetail'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
+import KakaoPayCallback from './pages/KakaoPayCallback'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Cards from './pages/Cards'
@@ -38,6 +39,14 @@ export default function App() {
           element={
             <RequireAuth>
               <Checkout />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="payments/kakao/callback"
+          element={
+            <RequireAuth>
+              <KakaoPayCallback />
             </RequireAuth>
           }
         />
