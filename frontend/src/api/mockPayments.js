@@ -121,6 +121,7 @@ const normalizeFallbackPayment = (payment) => ({
   merchantName: payment.orderTitle,
   status: payment.status,
   paymentMethod: payment.paymentMethod,
+  approvalNumber: payment.approvalNumber,
   createdAt: payment.approvedAt,
 })
 
