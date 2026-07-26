@@ -23,7 +23,7 @@ export default function () {
   // 💡 실제 테스트할 API 엔드포인트로 변경하시옵소서
   const BASE_URL = 'https://api.ajttk.com'; 
   
-  const res = http.get(`${BASE_URL}/actuator/health`); // 또는 핵심 조회 API
+  const res = http.get(`${BASE_URL}/health`); // 또는 핵심 조회 API
   
   check(res, {
     'status is 200': (r) => r.status === 200,

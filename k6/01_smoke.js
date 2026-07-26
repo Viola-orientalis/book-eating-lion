@@ -16,7 +16,7 @@ export const options = {
 export default function () {
   const BASE_URL = 'https://api.ajttk.com'; // 💡 테스트할 백엔드 API 주소
 
-  const res = http.get(`${BASE_URL}/actuator/health`);
+  const res = http.get(`${BASE_URL}/health`);
 
   // 응답 검증
   check(res, {

@@ -12,7 +12,7 @@ export const options = {
 
 export default function () {
   const BASE_URL = 'https://api.ajttk.com';
-  const res = http.get(`${BASE_URL}/actuator/health`);
+  const res = http.get(`${BASE_URL}/health`);
   
   check(res, {
     'status is 200': (r) => r.status === 200,
