@@ -141,15 +141,18 @@ export default function Checkout() {
       saveKakaoPaySession({ orderId, tid: readyRes.data.tid })
 
       // 모바일 여부는 일단 PC 기준으로만 처리 (필요하면 나중에 UA로 분기)
-      // noopener: 새 탭(제3자 결제 페이지)에 이 창에 대한 참조를 주지 않는다 - 확인은
-      // window.opener/postMessage가 아니라 주문 상태 재조회로 하므로 안전하게 끊어도 된다.
-      const kakaoWindow = window.open(readyRes.data.nextRedirectPcUrl, '_blank', 'noopener')
+      // 'noopener' 옵션은 스펙상 팝업이 성공적으로 열려도 window.open()이 항상 null을
+      // 반환하게 만들어 차단 여부 판별이 불가능해진다. 대신 반환된 레퍼런스에
+      // opener = null을 대입해서 opener 참조를 끊는다 - 확인은 window.opener/postMessage가
+      // 아니라 주문 상태 재조회로 하므로 안전하게 끊어도 된다.
+      const kakaoWindow = window.open(readyRes.data.nextRedirectPcUrl, '_blank')
       if (!kakaoWindow) {
         // 팝업이 차단된 경우: 기존 방식(현재 탭 이동)으로 폴백 -> KakaoPayCallback.jsx가
         // 그대로 처리해준다.
         window.location.href = readyRes.data.nextRedirectPcUrl
         return
       }
+      kakaoWindow.opener = null
 
       setKakaoOrderId(orderId)
       setStatus('kakao_awaiting_confirm')
