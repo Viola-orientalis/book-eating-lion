@@ -8,7 +8,7 @@ import {
 
 const buildBookFormData = (bookData, imageFile) => {
   const formData = new FormData()
-  formData.append('bookData', new Blob([JSON.stringify(bookData)], { type: 'application/json' }))
+  formData.append('bookData', new Blob([JSON.stringify(bookData)], { type: 'application/json; charset=utf-8' }))
   if (imageFile) {
     formData.append('image', imageFile)
   }
