@@ -32,20 +32,21 @@ public class PaymentQueryService {
             throw new IllegalArgumentException("결제 대기 중인 주문이 아닙니다.");
         }
 
-        return kakaoPayService.ready(memberId, order.getOrderId(), order.getTotalAmount(), "도서 주문 #" + order.getOrderId());
+        return kakaoPayService.ready(memberId, order.getOrderId(), order.getTotalAmount(),
+                "도서 주문 #" + order.getOrderId());
     }
 
-    public List<PaymentDto.HistoryResponse> getMyPayments(Long memberId) {
-        return paymentMapper.findByMemberId(memberId).stream()
+    public List<PaymentDto.HistoryResponse> getMyPayments(Long memberId, String yearMonth) {
+        return paymentMapper.findByMemberId(memberId, yearMonth).stream()
                 .map(p -> new PaymentDto.HistoryResponse(
                         p.getPaymentId(),
                         p.getOrderId(),
                         p.getPaymentMethod(),
+                        p.getApprovalNumber(),
                         p.getAmount(),
                         p.getPaymentStatus(),
                         p.getApprovedAt(),
-                        p.getOrderTitle()
-                ))
+                        p.getOrderTitle()))
                 .toList();
     }
 }

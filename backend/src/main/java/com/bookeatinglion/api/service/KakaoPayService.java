@@ -49,10 +49,10 @@ public class KakaoPayService {
         parameters.put("total_amount", totalAmount);
         parameters.put("tax_free_amount", 0);
 
-        // redirect URLs pointing to the frontend
-        parameters.put("approval_url", frontendUrl + "/checkout?status=success&orderId=" + orderId);
-        parameters.put("cancel_url", frontendUrl + "/checkout?status=cancel&orderId=" + orderId);
-        parameters.put("fail_url", frontendUrl + "/checkout?status=fail&orderId=" + orderId);
+        // redirect URLs pointing to the frontend callback page
+        parameters.put("approval_url", frontendUrl + "/payments/kakao/callback");
+        parameters.put("cancel_url", frontendUrl + "/payments/kakao/callback?status=cancel");
+        parameters.put("fail_url", frontendUrl + "/payments/kakao/callback?status=fail");
 
         HttpHeaders headers = getHeaders();
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(parameters, headers);

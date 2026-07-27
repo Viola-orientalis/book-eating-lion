@@ -23,7 +23,7 @@ public class OrderQueryService {
         return orders.stream().map(order -> {
             List<OrderItem> items = orderMapper.findItemsByOrderId(order.getOrderId());
             List<OrderDto.ItemResponse> itemDtos = items.stream()
-                    .map(i -> new OrderDto.ItemResponse(i.getBookTitle(), i.getQuantity(), i.getUnitPrice() * i.getQuantity()))
+                    .map(i -> new OrderDto.ItemResponse(i.getBookId(), i.getBookTitle(), i.getQuantity(), i.getUnitPrice()))
                     .toList();
 
             return new OrderDto.Response(
@@ -31,18 +31,19 @@ public class OrderQueryService {
                     order.getTotalAmount(),
                     order.getOrderStatus(),
                     order.getCreatedAt(),
-                    itemDtos
-            );
+                    itemDtos);
         }).toList();
     }
 
-    public com.bookeatinglion.api.dto.PageResponse<OrderDto.AdminResponse> getAdminOrders(String status, int page, int size) {
+    public com.bookeatinglion.api.dto.PageResponse<OrderDto.AdminResponse> getAdminOrders(String status, int page,
+            int size) {
         int offset = page * size;
         List<OrderDto.AdminResponse> content = orderMapper.findAllAdminOrders(status, offset, size);
         long totalElements = orderMapper.countAllAdminOrders(status);
         int totalPages = (int) Math.ceil((double) totalElements / Math.max(1, size));
 
-        com.bookeatinglion.api.dto.PageResponse.PageInfo pageInfo = new com.bookeatinglion.api.dto.PageResponse.PageInfo(page, size, totalElements, totalPages);
+        com.bookeatinglion.api.dto.PageResponse.PageInfo pageInfo = new com.bookeatinglion.api.dto.PageResponse.PageInfo(
+                page, size, totalElements, totalPages);
         return new com.bookeatinglion.api.dto.PageResponse<>(content, pageInfo);
     }
 }

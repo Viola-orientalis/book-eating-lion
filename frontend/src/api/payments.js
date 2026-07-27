@@ -31,10 +31,11 @@ export const cancelPayment = async (paymentId, cancelReason = '고객 변심') =
   }
 }
 
-// REQ-08: 결제 내역 조회
-export const getMyPayments = async () => {
+// REQ-08: 결제 내역 조회 (yearMonth 파라미터 전달 가능)
+export const getMyPayments = async (yearMonth) => {
   try {
-    return await apiClient.get('/api/payments')
+    const params = yearMonth ? { yearMonth } : {}
+    return await apiClient.get('/api/payments', { params })
   } catch {
     return mockGetMyPayments()
   }
@@ -67,16 +68,16 @@ export const approveKakaoPay = async ({ orderId, tid, pgToken }) => {
 const KAKAO_PAY_SESSION_KEY = 'bookmeogeun-kakaopay-session'
 
 // ready 요청 ~ 카카오 결제 페이지 리다이렉트 ~ 콜백 승인 사이, 페이지를 완전히 벗어났다가
-// 돌아오는 동안 유지해야 하는 tid/orderId를 sessionStorage에 잠깐 보관한다.
+// 새 탭으로 돌아오는 동안 탭 간 공유되도록 tid/orderId를 localStorage에 보관한다.
 export const saveKakaoPaySession = ({ orderId, tid }) => {
-  sessionStorage.setItem(KAKAO_PAY_SESSION_KEY, JSON.stringify({ orderId, tid }))
+  localStorage.setItem(KAKAO_PAY_SESSION_KEY, JSON.stringify({ orderId, tid }))
 }
 
 export const readKakaoPaySession = () => {
-  const raw = sessionStorage.getItem(KAKAO_PAY_SESSION_KEY)
+  const raw = localStorage.getItem(KAKAO_PAY_SESSION_KEY)
   return raw ? JSON.parse(raw) : null
 }
 
 export const clearKakaoPaySession = () => {
-  sessionStorage.removeItem(KAKAO_PAY_SESSION_KEY)
+  localStorage.removeItem(KAKAO_PAY_SESSION_KEY)
 }

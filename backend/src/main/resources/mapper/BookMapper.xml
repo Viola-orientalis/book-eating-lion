@@ -5,7 +5,9 @@
 
     <sql id="bookConditions">
         <where>
-            sale_status = 'ON_SALE'
+            <if test="saleStatus != null and saleStatus != ''">
+                AND sale_status = #{saleStatus}
+            </if>
             <if test="keyword != null and keyword != ''">
                 AND (title LIKE CONCAT('%', #{keyword}, '%') OR author LIKE CONCAT('%', #{keyword}, '%'))
             </if>

@@ -19,10 +19,22 @@ public class BookQueryService {
 
     public PageResponse<BookDto.Response> getBooks(String keyword, String category, int page, int size) {
         int offset = page * size;
-        List<Book> books = bookMapper.findAll(keyword, category, offset, size);
+        List<Book> books = bookMapper.findAll(keyword, category, "ON_SALE", offset, size);
         List<BookDto.Response> dtos = books.stream().map(BookDto.Response::from).toList();
 
-        long totalElements = bookMapper.countAll(keyword, category);
+        long totalElements = bookMapper.countAll(keyword, category, "ON_SALE");
+        int totalPages = (int) Math.ceil((double) totalElements / size);
+
+        PageResponse.PageInfo pageInfo = new PageResponse.PageInfo(page, size, totalElements, totalPages);
+        return new PageResponse<>(dtos, pageInfo);
+    }
+
+    public PageResponse<BookDto.Response> getAdminBooks(String keyword, String category, int page, int size) {
+        int offset = page * size;
+        List<Book> books = bookMapper.findAll(keyword, category, null, offset, size);
+        List<BookDto.Response> dtos = books.stream().map(BookDto.Response::from).toList();
+
+        long totalElements = bookMapper.countAll(keyword, category, null);
         int totalPages = (int) Math.ceil((double) totalElements / size);
 
         PageResponse.PageInfo pageInfo = new PageResponse.PageInfo(page, size, totalElements, totalPages);

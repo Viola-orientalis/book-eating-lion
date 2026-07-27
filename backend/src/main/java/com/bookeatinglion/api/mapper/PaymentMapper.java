@@ -13,6 +13,6 @@ public interface PaymentMapper {
     void insertPayment(Payment payment);
     Optional<Payment> findById(Long paymentId);
     Optional<Payment> findByOrderId(Long orderId);
-    List<Payment> findByMemberId(Long memberId);
+    List<Payment> findByMemberId(@Param("memberId") Long memberId, @Param("yearMonth") String yearMonth);
     void updateStatus(@Param("paymentId") Long paymentId, @Param("status") PaymentStatus status, @Param("declineReason") String declineReason);
 }

@@ -4,6 +4,7 @@ import com.bookeatinglion.api.dto.StatementDto;
 import com.bookeatinglion.api.security.CustomUserDetails;
 import com.bookeatinglion.api.service.StatementQueryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,9 @@ public class StatementController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         return ResponseEntity.ok(statementQueryService.getStatements(userDetails.getMemberId(), startDate, endDate));
     }
 }

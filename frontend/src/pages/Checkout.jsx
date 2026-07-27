@@ -140,22 +140,9 @@ export default function Checkout() {
       const readyRes = await requestKakaoPayReady({ orderId })
       saveKakaoPaySession({ orderId, tid: readyRes.data.tid })
 
-      // 모바일 여부는 일단 PC 기준으로만 처리 (필요하면 나중에 UA로 분기)
-      // 'noopener' 옵션은 스펙상 팝업이 성공적으로 열려도 window.open()이 항상 null을
-      // 반환하게 만들어 차단 여부 판별이 불가능해진다. 대신 반환된 레퍼런스에
-      // opener = null을 대입해서 opener 참조를 끊는다 - 확인은 window.opener/postMessage가
-      // 아니라 주문 상태 재조회로 하므로 안전하게 끊어도 된다.
-      const kakaoWindow = window.open(readyRes.data.nextRedirectPcUrl, '_blank')
-      if (!kakaoWindow) {
-        // 팝업이 차단된 경우: 기존 방식(현재 탭 이동)으로 폴백 -> KakaoPayCallback.jsx가
-        // 그대로 처리해준다.
-        window.location.href = readyRes.data.nextRedirectPcUrl
-        return
-      }
-      kakaoWindow.opener = null
-
-      setKakaoOrderId(orderId)
-      setStatus('kakao_awaiting_confirm')
+      // 현재 탭을 카카오페이 결제 페이지로 직행 이동 (새 탭/팝업 차단 문제 방지)
+      window.location.href = readyRes.data.nextRedirectPcUrl
+      return
     } catch (err) {
       const text = getErrorMessage(err, '카카오페이 결제 요청 중 오류가 발생했습니다.')
       setStatus('declined')
@@ -297,51 +284,10 @@ export default function Checkout() {
       </section>
 
       {paymentMethod === 'CARD' && (
-      <section className="mb-6">
-        <h2 className="text-sm font-medium mb-2">결제 카드</h2>
-        {cards.length === 0 ? (
-          showLimitForm ? (
-            <CardLimitForm
-              submitting={issuingCard}
-              onSubmit={handleIssueCard}
-              onCancel={() => setShowLimitForm(false)}
-            />
-          ) : (
-            <button
-              onClick={() => setShowLimitForm(true)}
-              className="w-full py-2.5 rounded border font-medium"
-              style={{ borderColor: 'var(--color-clay)', color: 'var(--color-clay)' }}
-            >
-              가상 카드 발급받기
-            </button>
-          )
-        ) : (
-          <div className="flex flex-col gap-2">
-            {cards.map((card) => {
-              const remainingLimit = card.monthlyLimit - card.currentUsage
-              return (
-                <label
-                  key={card.cardId}
-                  className="flex items-center gap-3 border rounded px-4 py-2.5 cursor-pointer text-sm"
-                  style={{
-                    borderColor: selectedCardId === card.cardId ? 'var(--color-clay)' : 'var(--color-line)',
-                  }}
-                >
-                  <input
-                    type="radio"
-                    name="card"
-                    checked={selectedCardId === card.cardId}
-                    onChange={() => setSelectedCardId(card.cardId)}
-                  />
-                  <span>{card.maskedCardNumber}</span>
-                  <span className="ml-auto" style={{ color: 'var(--color-clay)' }}>
-                    한도 {remainingLimit?.toLocaleString()}원
-                  </span>
-                </label>
-              )
-            })}
-
-            {showLimitForm ? (
+        <section className="mb-6">
+          <h2 className="text-sm font-medium mb-2">결제 카드</h2>
+          {cards.length === 0 ? (
+            showLimitForm ? (
               <CardLimitForm
                 submitting={issuingCard}
                 onSubmit={handleIssueCard}
@@ -350,15 +296,56 @@ export default function Checkout() {
             ) : (
               <button
                 onClick={() => setShowLimitForm(true)}
-                className="text-sm underline self-start mt-1"
-                style={{ color: 'var(--color-clay)' }}
+                className="w-full py-2.5 rounded border font-medium"
+                style={{ borderColor: 'var(--color-clay)', color: 'var(--color-clay)' }}
               >
-                카드 추가 발급
+                가상 카드 발급받기
               </button>
-            )}
-          </div>
-        )}
-      </section>
+            )
+          ) : (
+            <div className="flex flex-col gap-2">
+              {cards.map((card) => {
+                const remainingLimit = card.monthlyLimit - card.currentUsage
+                return (
+                  <label
+                    key={card.cardId}
+                    className="flex items-center gap-3 border rounded px-4 py-2.5 cursor-pointer text-sm"
+                    style={{
+                      borderColor: selectedCardId === card.cardId ? 'var(--color-clay)' : 'var(--color-line)',
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="card"
+                      checked={selectedCardId === card.cardId}
+                      onChange={() => setSelectedCardId(card.cardId)}
+                    />
+                    <span>{card.maskedCardNumber}</span>
+                    <span className="ml-auto" style={{ color: 'var(--color-clay)' }}>
+                      한도 {remainingLimit?.toLocaleString()}원
+                    </span>
+                  </label>
+                )
+              })}
+
+              {showLimitForm ? (
+                <CardLimitForm
+                  submitting={issuingCard}
+                  onSubmit={handleIssueCard}
+                  onCancel={() => setShowLimitForm(false)}
+                />
+              ) : (
+                <button
+                  onClick={() => setShowLimitForm(true)}
+                  className="text-sm underline self-start mt-1"
+                  style={{ color: 'var(--color-clay)' }}
+                >
+                  카드 추가 발급
+                </button>
+              )}
+            </div>
+          )}
+        </section>
       )}
 
       {paymentMethod === 'KAKAOPAY' && (
