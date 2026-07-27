@@ -34,7 +34,7 @@
     <select id="findById" resultType="com.bookeatinglion.api.domain.Book">
         SELECT *
         FROM Books
-        WHERE book_id = #{bookId} AND sale_status = 'ON_SALE'
+        WHERE book_id = #{bookId}
     </select>
 
     <update id="decreaseStock">
