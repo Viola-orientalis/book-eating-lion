@@ -87,6 +87,7 @@ public class PaymentDto {
         private Long paymentId;
         private Long orderId;
         private PaymentMethod paymentMethod;
+        private String approvalNumber;
         private Long amount;
         private PaymentStatus status;
         private LocalDateTime approvedAt;

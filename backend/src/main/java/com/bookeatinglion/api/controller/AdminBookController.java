@@ -31,7 +31,7 @@ public class AdminBookController {
             @RequestParam(required = false) String category,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "100") int size) {
-        return ResponseEntity.ok(bookQueryService.getBooks(keyword, category, page, size));
+        return ResponseEntity.ok(bookQueryService.getAdminBooks(keyword, category, page, size));
     }
 
     // 관리자 상품 등록 (Streaming Upload 적용)

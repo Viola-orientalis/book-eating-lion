@@ -51,6 +51,7 @@ public class OrderDto {
     @Setter
     @AllArgsConstructor
     public static class ItemResponse {
+        private Long bookId;
         private String title;
         private Integer quantity;
         private Long price;

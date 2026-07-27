@@ -50,7 +50,15 @@
         JOIN Order_Items oi ON o.order_id = oi.order_id
         JOIN Books b ON oi.book_id = b.book_id
         WHERE o.order_status = 'PAID'
-        GROUP BY ageGroup, m.gender, b.book_id, b.title, b.category
+        GROUP BY 
+            CASE 
+                WHEN m.age BETWEEN 10 AND 19 THEN '10대'
+                WHEN m.age BETWEEN 20 AND 29 THEN '20대'
+                WHEN m.age BETWEEN 30 AND 39 THEN '30대'
+                WHEN m.age BETWEEN 40 AND 49 THEN '40대'
+                WHEN m.age BETWEEN 50 AND 59 THEN '50대'
+                ELSE '기타'
+            END, m.gender, b.book_id, b.title, b.category
         ORDER BY ageGroup ASC, m.gender ASC, totalQuantitySold DESC
     </select>
 

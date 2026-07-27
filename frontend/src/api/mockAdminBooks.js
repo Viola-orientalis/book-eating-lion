@@ -4,7 +4,7 @@ import { MOCK_BOOKS } from './mockBooks'
 export const ADMIN_BOOKS_KEY = 'bookmeogeun-mock-admin-books'
 
 const seedAdminBooks = () => {
-  const seeded = MOCK_BOOKS.map((b) => ({ ...b, status: 'ON_SALE', imageUrl: null }))
+  const seeded = MOCK_BOOKS.map((b) => ({ ...b, status: 'ON_SALE', saleStatus: 'ON_SALE', imageUrl: null }))
   writeMockList(ADMIN_BOOKS_KEY, seeded)
   return seeded
 }
@@ -26,6 +26,7 @@ export const mockCreateAdminBook = (bookData, imageFile) => {
     ...bookData,
     bookId: nextAdminBookId(list),
     status: 'ON_SALE',
+    saleStatus: 'ON_SALE',
     imageUrl: imageFile ? URL.createObjectURL(imageFile) : null,
   }
   writeMockList(ADMIN_BOOKS_KEY, [...list, book])
@@ -55,7 +56,7 @@ export const mockDeleteAdminBook = (bookId) => {
   const target = list.find((b) => b.bookId === Number(bookId))
   if (!target) throw mockApiError('도서를 찾을 수 없습니다.', 'BOOK_NOT_FOUND')
 
-  const updated = { ...target, status: 'STOPPED' }
+  const updated = { ...target, status: 'STOPPED', saleStatus: 'STOPPED' }
   writeMockList(
     ADMIN_BOOKS_KEY,
     list.map((b) => (b.bookId === updated.bookId ? updated : b))

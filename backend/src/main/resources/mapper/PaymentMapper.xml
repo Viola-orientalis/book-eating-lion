@@ -76,6 +76,9 @@
             JOIN Books b ON oi.book_id = b.book_id
         ) first_item ON count_sub.min_item_id = first_item.order_item_id
         WHERE o.member_id = #{memberId}
+        <if test="yearMonth != null and yearMonth != ''">
+            AND DATE_FORMAT(p.approved_at, '%Y-%m') = #{yearMonth}
+        </if>
         ORDER BY p.payment_id DESC
     </select>
 

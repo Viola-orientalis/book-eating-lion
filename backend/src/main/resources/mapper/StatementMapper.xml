@@ -5,8 +5,8 @@
 
     <select id="selectMonthlyStatements" resultType="com.bookeatinglion.api.dto.StatementDto$Response">
         SELECT DATE_FORMAT(p.approved_at, '%Y-%m') as statementId,
-               DATE_FORMAT(DATE_SUB(p.approved_at, INTERVAL DAYOFMONTH(p.approved_at)-1 DAY), '%Y-%m-01') as periodStart,
-               DATE_FORMAT(LAST_DAY(p.approved_at), '%Y-%m-%d') as periodEnd,
+               DATE_FORMAT(MIN(p.approved_at), '%Y-%m-01') as periodStart,
+               DATE_FORMAT(LAST_DAY(MAX(p.approved_at)), '%Y-%m-%d') as periodEnd,
                SUM(p.amount) as totalAmount,
                COUNT(p.payment_id) as paymentCount
         FROM Payments p

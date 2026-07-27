@@ -33,7 +33,8 @@ public class BookCommandService {
             throw new IllegalArgumentException("상품 이미지는 필수입니다.");
         }
 
-        String imageUrl = s3UploadService.uploadStream(imageFile, "books");
+        long seq = bookMapper.countAll(null, book.getCategory(), null) + 1;
+        String imageUrl = s3UploadService.uploadBookCover(imageFile, book.getCategory(), seq);
         book.setImageUrl(imageUrl);
 
         bookMapper.insertBook(book);
@@ -45,6 +46,11 @@ public class BookCommandService {
     }
 
     public Map<String, Object> updateBook(Long bookId, BookDto.UpdateRequest request, MultipartFile imageFile) throws IOException {
+        Book existingBook = bookMapper.findById(bookId);
+        if (existingBook == null) {
+            throw new IllegalArgumentException("해당 도서를 찾을 수 없습니다.");
+        }
+
         Book book = request.toEntity(bookId);
 
         if (book.getPrice() != null && book.getPrice() < 0) {
@@ -55,13 +61,14 @@ public class BookCommandService {
         }
 
         if (imageFile != null && !imageFile.isEmpty()) {
-            String imageUrl = s3UploadService.uploadStream(imageFile, "books");
+            String category = book.getCategory() != null ? book.getCategory() : existingBook.getCategory();
+            String imageUrl = s3UploadService.uploadBookCover(imageFile, category, bookId);
             book.setImageUrl(imageUrl);
         }
 
         int updatedRows = bookMapper.updateBook(book);
         if (updatedRows == 0) {
-            throw new IllegalArgumentException("해당 도서를 찾을 수 없습니다.");
+            throw new IllegalArgumentException("해당 도서를 수정하지 못했습니다.");
         }
 
         return Map.of("message", "상품 정보가 수정되었습니다.", "bookId", bookId);
@@ -81,10 +88,10 @@ public class BookCommandService {
     }
 
     public Map<String, Object> deleteBook(Long bookId) {
-        int deletedRows = bookMapper.deleteBook(bookId);
-        if (deletedRows == 0) {
+        int updatedRows = bookMapper.updateSaleStatus(bookId, "STOPPED");
+        if (updatedRows == 0) {
             throw new IllegalArgumentException("해당 도서를 찾을 수 없습니다.");
         }
-        return Map.of("message", "상품이 삭제되었습니다.", "bookId", bookId);
+        return Map.of("message", "상품이 판매중지 처리되었습니다.", "bookId", bookId);
     }
 }

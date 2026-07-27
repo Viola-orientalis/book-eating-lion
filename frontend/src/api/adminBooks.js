@@ -25,9 +25,7 @@ export const getAdminBooks = async () => {
 
 export const createAdminBook = async (bookData, imageFile) => {
   try {
-    return await apiClient.post('/api/admin/books', buildBookFormData(bookData, imageFile), {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
+    return await apiClient.post('/api/admin/books', buildBookFormData(bookData, imageFile))
   } catch {
     return mockCreateAdminBook(bookData, imageFile)
   }
@@ -35,9 +33,7 @@ export const createAdminBook = async (bookData, imageFile) => {
 
 export const updateAdminBook = async (bookId, bookData, imageFile) => {
   try {
-    return await apiClient.put(`/api/admin/books/${bookId}`, buildBookFormData(bookData, imageFile), {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
+    return await apiClient.put(`/api/admin/books/${bookId}`, buildBookFormData(bookData, imageFile))
   } catch {
     return mockUpdateAdminBook(bookId, bookData, imageFile)
   }

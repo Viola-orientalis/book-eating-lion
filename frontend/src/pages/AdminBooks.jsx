@@ -33,6 +33,7 @@ function AdminBookForm({ formRef, initialBook, submitting, onSubmit, onCancel })
     stock: initialBook?.stock ?? '',
     category: initialBook?.category ?? CATEGORIES[0],
     description: initialBook?.description ?? '',
+    saleStatus: initialBook?.saleStatus || initialBook?.status || 'ON_SALE',
   }))
   const [imageFile, setImageFile] = useState(null)
 
@@ -86,6 +87,19 @@ function AdminBookForm({ formRef, initialBook, submitting, onSubmit, onCancel })
         </label>
 
         <label className="flex flex-col gap-1 text-sm">
+          <span style={{ color: 'var(--color-ink)' }}>판매 상태</span>
+          <select
+            value={form.saleStatus}
+            onChange={handleChange('saleStatus')}
+            className="border rounded-lg px-3 py-2 text-sm outline-none"
+            style={{ borderColor: 'var(--color-line)' }}
+          >
+            <option value="ON_SALE">판매중</option>
+            <option value="STOPPED">판매중지</option>
+          </select>
+        </label>
+
+        <label className="flex flex-col gap-1 text-sm sm:col-span-2">
           <span style={{ color: 'var(--color-ink)' }}>표지 이미지</span>
           <input
             type="file"
@@ -241,7 +255,7 @@ export default function AdminBooks() {
       ) : (
         <div>
           {books.map((book) => {
-            const stopped = book.status === 'STOPPED'
+            const stopped = (book.saleStatus || book.status) === 'STOPPED'
             const badgeColor = stopped ? 'var(--color-danger)' : 'var(--color-forest)'
             return (
               <div
@@ -254,7 +268,7 @@ export default function AdminBooks() {
                     {book.title}
                   </p>
                   <p className="text-sm mt-1" style={{ color: 'var(--color-clay)' }}>
-                    {book.author} · {book.price?.toLocaleString()}원 · 재고 {book.stock}
+                    {book.author} · {book.publisher || '출판사 미지정'} · ISBN: {book.isbn || '-'} · {book.price?.toLocaleString()}원 · 재고 {book.stock}
                   </p>
                   <span
                     className="inline-block mt-2 rounded-full px-2 py-0.5 text-xs font-medium"

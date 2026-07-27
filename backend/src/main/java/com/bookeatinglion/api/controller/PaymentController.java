@@ -23,8 +23,9 @@ public class PaymentController {
 
     @GetMapping
     public ResponseEntity<List<PaymentDto.HistoryResponse>> getMyPayments(
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(paymentQueryService.getMyPayments(userDetails.getMemberId()));
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(required = false) String yearMonth) {
+        return ResponseEntity.ok(paymentQueryService.getMyPayments(userDetails.getMemberId(), yearMonth));
     }
 
     @PostMapping("/card")

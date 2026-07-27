@@ -33,6 +33,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
+    @ExceptionHandler(org.springframework.jdbc.CannotGetJdbcConnectionException.class)
+    public ResponseEntity<Map<String, String>> handleDatabaseException(Exception ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("errorCode", "DATABASE_UNAVAILABLE");
+        error.put("message", "데이터베이스 연결에 실패했습니다. (RDS 인프라 또는 네트워크 설정을 확인하세요)");
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleAllExceptions(Exception ex) {
         Map<String, String> error = new HashMap<>();

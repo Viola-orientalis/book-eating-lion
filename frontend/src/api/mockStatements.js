@@ -1,3 +1,4 @@
+import apiClient from './client'
 import { readMockList, mockApiError } from './mockStorage'
 import { getMockSessionUserId, isMockOrRealSessionActive } from './mockSession'
 import { PAYMENTS_KEY, MERCHANT_NAME } from './mockPayments'
@@ -101,7 +102,7 @@ const drawStatementContent = (doc, autoTable, { monthKey, merchantName, periodSt
     body: sortedPayments.map((p) => [
       toDateOnly(new Date(p.createdAt)),
       p.bookSummary,
-      toCompactCardNumber(getMockCardById(p.cardId)?.maskedCardNumber),
+      p.paymentMethodLabel || toCompactCardNumber(getMockCardById(p.cardId)?.maskedCardNumber),
       formatWon(p.amount),
     ]),
     ...tableTheme,
@@ -138,35 +139,53 @@ export const mockDownloadStatement = async (statementId) => {
   const [year, month] = monthKey.split('-').map(Number)
   if (!year || !month) throw mockApiError('영수증을 찾을 수 없습니다.', 'STATEMENT_NOT_FOUND')
 
-  const periodStart = new Date(year, month - 1, 1)
-  const periodEnd = new Date(year, month, 0, 23, 59, 59, 999)
+  let payments = []
 
-  const payments = readMockList(PAYMENTS_KEY).filter((p) => {
-    if (p.userId !== userId || p.status !== 'APPROVED') return false
-    const createdAt = new Date(p.createdAt)
-    return createdAt >= periodStart && createdAt <= periodEnd
-  })
+  try {
+    const res = await apiClient.get('/api/payments', { params: { yearMonth: monthKey } })
+    const remotePayments = res.data ?? []
+    payments = remotePayments
+      .filter((p) => p.status === 'APPROVED')
+      .map((p) => ({
+        id: p.paymentId,
+        orderId: p.orderId,
+        amount: p.amount,
+        merchantName: MERCHANT_NAME,
+        bookSummary: p.orderTitle || '-',
+        status: p.status,
+        paymentMethod: p.paymentMethod,
+        paymentMethodLabel: p.paymentMethod === 'KAKAOPAY' ? '카카오페이' : '카드',
+        approvalNumber: p.approvalNumber,
+        createdAt: p.approvedAt,
+      }))
+  } catch {
+    payments = readMockList(PAYMENTS_KEY).filter((p) => {
+      if (p.userId !== userId || p.status !== 'APPROVED') return false
+      const dateStr = String(p.createdAt || '')
+      return dateStr.startsWith(monthKey)
+    })
+  }
+
   if (payments.length === 0) {
     throw mockApiError('영수증을 찾을 수 없습니다.', 'STATEMENT_NOT_FOUND')
   }
 
-  // 로컬 mock 저장소에 없는(실제 백엔드에서 온) 결제도 도서명을 표시할 수 있도록 주문을
-  // 조회해 도서명 요약을 미리 붙여둔다. 결제 건마다 따로 부르면 실제 목록 조회(GET
-  // /api/orders)가 매번 나가므로, orderId를 모아 한 번에 배치로 조회한다.
-  // drawStatementContent는 renderVectorPdf가 두 번(측정/실제 렌더) 동기로 호출하므로,
-  // 비동기 조회는 그리기 전에 전부 끝내둔다.
-  const ordersById = await resolveOrdersForReceipts(payments.map((p) => p.orderId))
+  const periodStart = `${monthKey}-01`
+  const periodEnd = `${monthKey}-31`
+
+  const unmappedOrderIds = payments.filter((p) => !p.bookSummary || p.bookSummary === '-').map((p) => p.orderId)
+  const ordersById = unmappedOrderIds.length > 0 ? await resolveOrdersForReceipts(unmappedOrderIds) : new Map()
   const paymentsWithBooks = payments.map((p) => ({
     ...p,
-    bookSummary: summarizeOrderItems(ordersById.get(Number(p.orderId))),
+    bookSummary: p.bookSummary && p.bookSummary !== '-' ? p.bookSummary : summarizeOrderItems(ordersById.get(Number(p.orderId))),
   }))
 
   const downloadUrl = await renderVectorPdf((doc, autoTable) =>
     drawStatementContent(doc, autoTable, {
       monthKey,
       merchantName: payments[0]?.merchantName || MERCHANT_NAME,
-      periodStart: toDateOnly(periodStart),
-      periodEnd: toDateOnly(periodEnd),
+      periodStart,
+      periodEnd,
       payments: paymentsWithBooks,
     })
   )
